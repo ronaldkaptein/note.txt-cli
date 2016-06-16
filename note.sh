@@ -13,7 +13,7 @@ usage()
    usage: note.sh [-h] [-d directory] [-p prefix]  action [arguments]
 
    creates, opens or lists notes
-   if no title is given, user is queried for title. All notes get extension .txt. 
+   if no title is given, user is queried for title. All notes get extension .txt, and spaces in note names are replaced with underscores.
 
    OPTIONS:
     -h      Show this message
@@ -55,6 +55,12 @@ function add()
       #TODO: what to do with spaces in title/filename?
       Title=$Prefix"$@" 
       File=$Title$Extension
+   fi
+
+   FileWithoutSpaces=`echo $File |  sed 's/ /_/g' `
+   if [[ "$File" != "$FileWithoutSpaces" ]]; then
+      echo Replacing spaces: renaming $File to $FileWithoutSpaces
+      File=$FileWithoutSpaces
    fi
 
    if [ -f "$File" ]; then

@@ -3,109 +3,69 @@
 #Set defaults:
 Directory=~/Notes/
 Extension='.txt'
-Openlastnote=0
 Prefix=""
-Lastnotefile=~/.lastnote
+Lastnotefile=~/.notetxthistory
 
 usage()
 {
    cat << EOF
-   usage: note.sh options actions arguments
+   usage: note.sh [-h] [-d directory] [-p prefix]  action [arguments]
 
    creates, opens or lists notes
    if no title is given, user is queried for title. All notes get extension .txt. 
 
-      OPTIONS:
-      -h      Show this message
-      -d      Set notes directory (default is ~/Notes)
-      -p      Prefix to use before title  (default is none). Accepts bash date sequences 
-      such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
+   OPTIONS:
+    -h      Show this message
+    -d      Set notes directory (default is ~/Notes)
+    -p      Prefix to use before title  (default is none). Accepts bash date sequences 
+            such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
 
-      ACTIONS
+   ACTIONS:
+    add|o       Creates a new note. Takes title of note as argument. If no argument given, user is queried for one.
+    open|o      Opens an existing note. Takes a number as argument, taken from the list action. If no argument, list with 10 last notes is shown.
+                If argument is "last", last note is opened.
+    list|ls     lists existing notes. Takes search query as argument. If query is "last", 10 last opened files are listed
 
-      add|o       Creates a new note. Takes title of note as argument. If no argument given, user is queried for one.
-      open|o      Opens an existing note. Takes a number as argument, taken from the list action. If no argument, list with 10 last notes is shown.
-                  If argument is "last", last note is opened.
-      list|ls     lists existing notes. Takes search query as argument. 
-
-         EXAMPLES
-
-         note.sh add
-         note.sh a title
-         note.sh list 
-         note.sh ls query
-         note.sh open
-         note.sh o 22
-         note.sh open last
+   EXAMPLES
+    note.sh add
+    note.sh a title
+    note.sh list 
+    note.sh ls query
+    note.sh ls last
+    note.sh open
+    note.sh o 22
+    note.sh open last
 EOF
 }
 
 function add()
 {
-   Newfile='y'
    Prefix=`date +$Prefix`
    cd $Directory
 
-   if [ "$Openlastnote" == "1" ]; then
-      File=`head -1 $Lastnotefile`
-      if [ "$File" == "" ];then 
-         echo "No last file found"
-         exit
-      fi
-      echo "Opening $File"
-      Newfile='n'
-   elif [ $# -eq 0 ]; then
+   if [ $# -eq 0 ]; then
       read -p "Title of note (leave empty for DateTime): " Title
       if [ "$Title" == "" ]; then
          Title=`date +%Y%m%dT%H%M%S`
       fi
       Title=$Prefix$Title
       File=$Title$Extension
-   elif [ "$1" == "LAST" ]; then
-      File=`head -1 $Lastnotefile`
-      if [ "$File" == "" ];then 
-         echo "No last file found"
-         exit
-      fi
-      echo "Opening $File"
    else
       #TODO: what to do with spaces in title/filename?
       Title=$Prefix"$@" 
       File=$Title$Extension
    fi
 
-   if [ -f "$File" -a "$Openlastnote" != "1" ]; then
+   if [ -f "$File" ]; then
       echo "File $File already exists."
       read -p "Open existing file (y/n, default y)? " Openexisting
       if [ "$Openexisting" == "n" ]; then
          exit
-      else
-         Newfile='n'
       fi
    fi
 
    echo Opening $File
    openfile $File
-   #read -p "Open with vim (default) or notepad++ (n)? " Editor
-
-   #if [ "$EditorQ" == "np" -o "$EditorQ" == "n" ]; then
-      #Winfile=`cygpath -w "$File"`
-      #/c/Program\ Files\ \(x86\)/Notepad++/notepad++.exe "$Winfile" &
-      #echo Opened "$File" in Notepad++
-   #else
-      #/usr/bin/vim "$File"
-      #if [ -f "$File" ]; then
-         #if [ "$Newfile" == "y" ]; then
-            #chmod 640 "$File"
-            #echo created $File
-         #else
-            #echo opened $File
-         #fi
-      #else
-         #echo "Note not saved, file $File not created"
-         #exit
-      #fi
-   #fi
 
    CheckExists=`grep -Fx "$File" $Lastnotefile`
    if [[ "$CheckExists" != "" ]]; then
@@ -143,6 +103,8 @@ function list()
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `
+   elif [ "$Query" == "last" ]; then
+      Files=`cat $Lastnotefile`
    else
       #Find in content:
       Files=`grep -R --color -l -i "$Query" * | grep .txt `
@@ -290,7 +252,3 @@ case $action in
       usage
       exit
 esac
-
-exit
-
-

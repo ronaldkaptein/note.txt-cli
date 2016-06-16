@@ -5,6 +5,7 @@ Directory=~/Notes/
 Extension='.txt'
 Prefix=""
 Lastnotefile=~/.notetxthistory
+DefaultNoArguments='list last'
 
 usage()
 {
@@ -225,21 +226,26 @@ do
 done
 shift $((OPTIND-1))
 
-
-action=$1
-shift
+if [[ "$1" == "" ]]; then
+   action=`echo $DefaultNoArguments | cut -d " " -f 1`
+   arguments=`echo $DefaultNoArguments | cut -d " " -f 2-`
+else
+   action=$1
+   shift
+   arguments=$*
+fi
 
 case $action in 
    add | a | new | n)
-      add $*
+      add $arguments
       exit
       ;;
    list | find | ls | f)
-      list $*
+      list $arguments
       exit
       ;;
    open | o)
-      open $*
+      open $arguments
       exit 
       ;;
    help | usage)

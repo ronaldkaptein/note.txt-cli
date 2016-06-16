@@ -135,6 +135,8 @@ $Files2"
 }
 
 function open(){
+
+   cd $Directory
    
    if [ "$1" == "last" -o "$1" == "l" ]; then
       File=`head -1 $Lastnotefile`
@@ -142,7 +144,6 @@ function open(){
          echo "No last file found"
          exit
       fi
-      echo "Opening $File"
    elif [ $# -eq 0 ]; then
       Files=`cat $Lastnotefile`
 
@@ -186,7 +187,6 @@ function openfile(){
       fi
    fi
 
-   File=$Directory/$File
    CheckExists=`grep -Fx "$File" $Lastnotefile`
    echo $CheckExists
    if [[ "$CheckExists" != "" ]]; then

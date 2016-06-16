@@ -1,4 +1,4 @@
-#NOTE.txt command-line interface
+#NOTE.TXT Command Line Interface
 
 A simple cli for working with plain text notes, inspired by [todo.txt](https://github.com/ginatrapani/todo.txt-cli/).
 

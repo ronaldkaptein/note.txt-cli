@@ -4,8 +4,8 @@
 Directory=~/Notes/
 Extension='.txt'
 Prefix=""
-Lastnotefile=~/.notetxthistory
-DefaultNoArguments='list last'
+NoteHistoryFile=~/.notetxthistory
+DefaultNoArguments='list history'
 
 usage()
 {
@@ -99,21 +99,21 @@ function add()
    echo Opening $File
    openfile $File
 
-   CheckExists=`grep -Fx "$File" $Lastnotefile`
+   CheckExists=`grep -Fx "$File" $NoteHistoryFile`
    if [[ "$CheckExists" != "" ]]; then
       #File already in lastnotefile, move it to top
-      LastFiles=`grep -vFx "$File" $Lastnotefile`
+      LastFiles=`grep -vFx "$File" $NoteHistoryFile`
    else
       #trash oldest file in lastnotefile and add new file on top
-      LastFiles=`head -9 $Lastnotefile`
+      LastFiles=`head -9 $NoteHistoryFile`
    fi
-   echo "$File" > $Lastnotefile
-   echo "$LastFiles" >> $Lastnotefile
+   echo "$File" > $NoteHistoryFile
+   echo "$LastFiles" >> $NoteHistoryFile
 }
 
 function list()
 {
-   Showall=0
+   ShowAll=0
    ShowLast=0
 
    #Removing trailing / from Directory:
@@ -123,20 +123,20 @@ function list()
 
    #If no input, show all notes:
    if [ "$#" -eq 0 -o "$1" == "all" ]; then
-      Showall=1
+      ShowAll=1
       echo Showing all notes in $Directory:
    else
       Query="$@"
    fi
 
-   if [ "$Query" == "*" -o "$Showall" == "1" ]; then
+   if [ "$Query" == "*" -o "$ShowAll" == "1" ]; then
       Files=`grep -R --color -l -i "" * | grep .txt | grep "/" | sort -u`
       Files2=`ls -R --format single-column *.txt`
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `
    elif [ "$Query" == "history" -o "$Query" == "h" ]; then
-      Files=`cat $Lastnotefile`
+      Files=`cat $NoteHistoryFile`
    else
       #Find in content:
       Files=`grep -R --color -l -i "$Query" * | grep .txt `
@@ -171,13 +171,13 @@ function open(){
    cd $Directory
    
    if [ "$1" == "last" -o "$1" == "l" ]; then
-      File=`head -1 $Lastnotefile`
+      File=`head -1 $NoteHistoryFile`
       if [ "$File" == "" ];then 
          echo "No last file found"
          exit
       fi
    elif [ $# -eq 0 ]; then
-      Files=`cat $Lastnotefile`
+      Files=`cat $NoteHistoryFile`
 
       SAVEIFS=$IFS
       IFS=$(echo -en "\n\b")
@@ -219,16 +219,16 @@ function openfile(){
       fi
    fi
 
-   CheckExists=`grep -Fx "$File" $Lastnotefile`
+   CheckExists=`grep -Fx "$File" $NoteHistoryFile`
    echo $CheckExists
    if [[ "$CheckExists" != "" ]]; then
       #File already in lastnotefile, move it to top
-      LastFiles=`grep -vFx "$File" $Lastnotefile`
+      LastFiles=`grep -vFx "$File" $NoteHistoryFile`
    else
-      LastFiles=`head -9 $Lastnotefile`
+      LastFiles=`head -9 $NoteHistoryFile`
    fi
-   echo "$File" > $Lastnotefile
-   echo "$LastFiles" >> $Lastnotefile
+   echo "$File" > $NoteHistoryFile
+   echo "$LastFiles" >> $NoteHistoryFile
 }
 
 #MAIN#

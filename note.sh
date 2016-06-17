@@ -98,17 +98,6 @@ function add()
 
    echo Opening $File
    openfile $File
-
-   CheckExists=`grep -Fx "$File" $NoteHistoryFile`
-   if [[ "$CheckExists" != "" ]]; then
-      #File already in lastnotefile, move it to top
-      LastFiles=`grep -vFx "$File" $NoteHistoryFile`
-   else
-      #trash oldest file in lastnotefile and add new file on top
-      LastFiles=`head -9 $NoteHistoryFile`
-   fi
-   echo "$File" > $NoteHistoryFile
-   echo "$LastFiles" >> $NoteHistoryFile
 }
 
 function list()
@@ -220,15 +209,17 @@ function openfile(){
    fi
 
    CheckExists=`grep -Fx "$File" $NoteHistoryFile`
-   echo $CheckExists
    if [[ "$CheckExists" != "" ]]; then
       #File already in lastnotefile, move it to top
       LastFiles=`grep -vFx "$File" $NoteHistoryFile`
    else
+      #trash oldest file in lastnotefile and add new file on top
       LastFiles=`head -9 $NoteHistoryFile`
    fi
+
    echo "$File" > $NoteHistoryFile
    echo "$LastFiles" >> $NoteHistoryFile
+
 }
 
 #MAIN#
@@ -264,6 +255,10 @@ else
    action=$1
    shift
    arguments=$*
+fi
+
+if [ ! -f "$NoteHistoryFile" ]; then
+   touch $NoteHistoryFile
 fi
 
 case $action in 

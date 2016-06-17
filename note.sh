@@ -12,30 +12,55 @@ usage()
    cat << EOF
    usage: note.sh [-h] [-d directory] [-p prefix]  action [arguments]
 
+   ACTIONS:
+    add|a [title]
+    open|o [ITEM#] ["last"]
+    list|ls [query] ["history" | "h"]
+    help
+EOF
+}
+
+longhelp()
+{
+   cat << EOF
+   usage: note.sh [-h] [-d directory] [-p prefix]  action [arguments]
+
    creates, opens or lists notes
-   if no title is given, user is queried for title. All notes get extension .txt, and spaces in note names are replaced with underscores.
+   if no title is given, user is queried for title. All notes get extension .txt, and spaces in note
+      names are replaced with underscores.
 
    OPTIONS:
-    -h      Show this message
+    -h      Show short usage info
     -d      Set notes directory (default is ~/Notes)
-    -p      Prefix to use before title  (default is none). Accepts bash date sequences 
+    -p      Prefix to use before title  (default is none). Accepts bash date sequences
             such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
 
    ACTIONS:
-    add|o       Creates a new note. Takes title of note as argument. If no argument given, user is queried for one.
-    open|o      Opens an existing note. Takes a number as argument, taken from the list action. If no argument, list with 10 last notes is shown.
-                If argument is "last", last note is opened.
-    list|ls     lists existing notes. Takes search query as argument. If query is "last", 10 last opened files are listed
+    add|a [TITLE]
+      Create a new note. TITLE is optional, if no title is given, user is queried for
+      one.
+    open|o [ITEM#] ["last"]
+      Open an existing note. The note number ITEM# corresponds to the number in the output of
+      "note.sh list". If the argument is "last", the last opened note is opened.
+    list|ls [QUERY] ["history" | "h"]
+      Lists notes. Without argument, all notes in the notes directory are listed, including notes in
+      subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are
+      shown. If the argument is "history" or "h", the last 10 opened notes are shown.
+    help
+      Displays this help
 
    EXAMPLES
-    note.sh add
-    note.sh a title
-    note.sh list 
-    note.sh ls query
-    note.sh ls last
-    note.sh open
-    note.sh o 22
-    note.sh open last
+    $ note.sh add
+    $ note.sh a title
+    $ note.sh list
+    $ note.sh ls query
+    $ note.sh ls last
+    $ note.sh open
+    $ note.sh o 22
+    $ note.sh open last
+
+
+   See https://bitbucket.org/ronaldk/note.txt-cli for more info
 EOF
 }
 
@@ -110,7 +135,7 @@ function list()
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `
-   elif [ "$Query" == "last" ]; then
+   elif [ "$Query" == "history" -o "$Query" == "h" ]; then
       Files=`cat $Lastnotefile`
    else
       #Find in content:
@@ -254,8 +279,8 @@ case $action in
       open $arguments
       exit 
       ;;
-   help | usage)
-      usage
+   help )
+      longhelp
       exit 
       ;;
    *)

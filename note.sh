@@ -120,7 +120,7 @@ function list()
 
    if [ "$Query" == "*" -o "$ShowAll" == "1" ]; then
       Files=`grep -R --color -l -i "" * | grep .txt | grep "/" | sort -u`
-      Files2=`ls -R --format single-column *.txt`
+      Files2=`ls -R --format single-column *.txt 2> /dev/null`
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `

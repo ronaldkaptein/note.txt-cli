@@ -13,3 +13,7 @@ A list of things I want to implement in the future, also for my own reference:
 - Make number of notes in history configurable
 - Allow to turn of full-text search, when listing becomes slow
 - Align list output better, e.g. as in 'tree' output, for better readability
+- Allow to bypass editor choice and always open in default editor
+
+
+IMPLEMENTED:

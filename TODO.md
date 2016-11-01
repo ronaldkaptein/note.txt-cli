@@ -11,3 +11,5 @@ A list of things I want to implement in the future, also for my own reference:
 - Allow to specify filename for open action instead of number
 - Enable auto completion of filenames
 - Make number of notes in history configurable
+- Allow to turn of full-text search, when listing becomes slow
+- Align list output better, e.g. as in 'tree' output, for better readability

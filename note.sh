@@ -23,8 +23,10 @@ EOF
 longhelp()
 {
    cat << EOF
-   usage: note.sh [-h] [-d directory] [-p prefix]  action [arguments]
+SYNOPSIS
+   note.sh [-h] [-d directory] [-p prefix]  action [arguments]
 
+DESCRIPTION
    creates, opens or lists notes
    if no title is given, user is queried for title. All notes get extension .txt, and spaces in note
       names are replaced with underscores.
@@ -49,7 +51,7 @@ longhelp()
     help
       Displays this help
 
-   EXAMPLES
+EXAMPLES
     $ note.sh add
     $ note.sh a title
     $ note.sh list
@@ -59,7 +61,11 @@ longhelp()
     $ note.sh o 22
     $ note.sh open last
 
+CREDITS & COPYRIGHTS
+   Copyright (C) 2016 Ronald Kaptein
+   This software is distributed under the GPLv3, see https://www.gnu.org/licenses/gpl-3.0.html
 
+SEE ALSO
    See https://bitbucket.org/ronaldk/note.txt-cli for more info
 EOF
 }

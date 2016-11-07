@@ -4,13 +4,13 @@
 Directory=~/Notes/
 Extension='.txt'
 Prefix=""
-NoteHistoryFile=~/.notetxthistory
+NoteHistoryFile=.notetxthistory
 DefaultNoArguments='list history'
 
 usage()
 {
    cat << EOF
-   usage: note.sh [-h] [-d directory] [-p prefix]  [-e extension] action [arguments]
+   usage: note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] action [arguments]
 
    ACTIONS:
     add|a [title]
@@ -32,6 +32,8 @@ DESCRIPTION
       names are replaced with underscores.
 
    OPTIONS:
+    -g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple
+    instances for e.g. home and work. Should normally be a hidden file (.filename)
     -h      Show short usage info
     -e EXT
        Use extension EXT instead of .txt
@@ -115,7 +117,6 @@ function list()
 
    #Removing trailing / from Directory:
    Directory=`echo $Directory | sed 's/\(.*\)[-\/]$/\1/g' `
-
    cd $Directory
 
    #If no input, show all notes:
@@ -127,8 +128,8 @@ function list()
    fi
 
    if [ "$Query" == "*" -o "$ShowAll" == "1" ]; then
-      Files=`grep -R --color -l -i "" * | grep .txt | grep "/" | sort -u`
-      Files2=`ls -R --format single-column *.txt 2> /dev/null`
+      Files=`grep -R --color -l -i "" * | grep $Extension | grep "/" | sort -u `
+      Files2=`ls -R --format single-column *$Extension 2> /dev/null`
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `
@@ -136,9 +137,9 @@ $Files"
       Files=`cat $NoteHistoryFile`
    else
       #Find in content:
-      Files=`grep -R --color -l -i "$Query" * | grep .txt `
+      Files=`grep -R --color -l -i "$Query" * | grep $Extension 2> /dev/null `
       #Find in file names. Sed is to remove leading ./ in find output
-      Files2=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g'`
+      Files2=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
       Files="$Files
 $Files2"
       Files=`printf '%s\n' "${Files[@]}" | sort -u`
@@ -185,8 +186,8 @@ function open(){
       done
       IFS=$SAVEIFS
    elif [ $# -gt 0 ]; then
-      Files=`grep -R --color -l -i "" * | grep .txt | grep "/" | sort -u`
-      Files2=`ls -R --format single-column *.txt 2> /dev/null`
+      Files=`grep -R --color -l -i "" * | grep $Extension | grep "/" | sort -u`
+      Files2=`ls -R --format single-column *$Extension 2> /dev/null`
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `
@@ -232,7 +233,7 @@ function openfile(){
 
 #MAIN#
 
-while getopts “hd:lqp:e:” OPTION
+while getopts “hd:lqp:e:g:” OPTION
 do
    case $OPTION in
       h)
@@ -251,6 +252,9 @@ do
       e) 
          Extension=$OPTARG
          ;;
+      g)
+         NoteHistoryFile=$OPTARG
+         ;;
       ?)
          usage
          exit
@@ -258,6 +262,8 @@ do
    esac
 done
 shift $((OPTIND-1))
+
+NoteHistoryFile="$HOME/$NoteHistoryFile"
 
 if [[ "$1" == "" ]]; then
    action=`echo $DefaultNoArguments | cut -d " " -f 1`
@@ -275,7 +281,7 @@ if [ "$ExtensionStart" != "." ]; then
 fi
 
 if [ ! -f "$NoteHistoryFile" ]; then
-   touch $NoteHistoryFile
+   touch "$NoteHistoryFile"
 fi
 
 case $action in 

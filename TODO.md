@@ -5,8 +5,6 @@ A list of things I want to implement in the future, also for my own reference:
 - Allow to specify multiple queries (AND), e.g by doing -q QUERY1 -q QUERY2
 - Allow to search only in a specific subdirectory
 - color in the list output 
-- Allow to specify the default filetype/extension for new notes (now .txt)
-- Allow to specify which filetype/extensions to list (now only .txt)
 - Enable auto completion of actions
 - Allow to specify filename for open action instead of number
 - Enable auto completion of filenames
@@ -17,3 +15,5 @@ A list of things I want to implement in the future, also for my own reference:
 
 
 IMPLEMENTED:
+- 161107: Allow to specify which filetype/extensions to list (now only .txt)
+- 161107: Allow to specify the default filetype/extension for new notes (now .txt)

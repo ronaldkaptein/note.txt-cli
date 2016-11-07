@@ -10,7 +10,7 @@ DefaultNoArguments='list history'
 usage()
 {
    cat << EOF
-   usage: note.sh [-h] [-d directory] [-p prefix]  action [arguments]
+   usage: note.sh [-h] [-d directory] [-p prefix]  [-e extension] action [arguments]
 
    ACTIONS:
     add|a [title]
@@ -33,6 +33,8 @@ DESCRIPTION
 
    OPTIONS:
     -h      Show short usage info
+    -e EXT
+       Use extension EXT instead of .txt
     -d      Set notes directory (default is ~/Notes)
     -p      Prefix to use before title  (default is none). Accepts bash date sequences
             such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
@@ -230,7 +232,7 @@ function openfile(){
 
 #MAIN#
 
-while getopts “hd:lqp:” OPTION
+while getopts “hd:lqp:e:” OPTION
 do
    case $OPTION in
       h)
@@ -245,6 +247,9 @@ do
          ;;
       p)
          Prefix=$OPTARG
+         ;;
+      e) 
+         Extension=$OPTARG
          ;;
       ?)
          usage
@@ -261,6 +266,12 @@ else
    action=$1
    shift
    arguments=$*
+fi
+
+#Check extension
+ExtensionStart=`echo $Extension | cut -c 1`
+if [ "$ExtensionStart" != "." ]; then
+   Extension=`echo ".$Extension"`
 fi
 
 if [ ! -f "$NoteHistoryFile" ]; then

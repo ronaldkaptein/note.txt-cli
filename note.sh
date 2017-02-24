@@ -28,8 +28,10 @@ SYNOPSIS
 
 DESCRIPTION
    creates, opens or lists notes
-   if no title is given, user is queried for title. All notes get extension .txt, and spaces in note
-      names are replaced with underscores.
+
+   All notes get extension .txt, and spaces in note names are replaced with underscores.
+
+   If no arguments are given, the last 10 opened notes are shown ("note.sh list history")
 
    OPTIONS:
     -g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple

@@ -68,11 +68,11 @@ EXAMPLES
     $ note.sh open last
 
 CREDITS & COPYRIGHTS
-   Copyright (C) 2016 Ronald Kaptein
+   Copyright (C) 2016-2017 Ronald Kaptein
    This software is distributed under the GPLv3, see https://www.gnu.org/licenses/gpl-3.0.html
 
 SEE ALSO
-   See https://bitbucket.org/ronaldk/note.txt-cli for more info
+   https://github.com/ronaldkaptein/note.txt-cli
 EOF
 }
 

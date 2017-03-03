@@ -3,6 +3,7 @@
 #Set defaults:
 Directory=~/Notes/
 Extension='.txt'
+GrepExtension='.txt'
 Prefix=""
 NoteHistoryFile=.notetxthistory
 DefaultNoArguments='list history'
@@ -10,7 +11,8 @@ DefaultNoArguments='list history'
 usage()
 {
    cat << EOF
-   usage: note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] action [arguments]
+   usage: note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
+          action [arguments]
 
    ACTIONS:
     add|a [title]
@@ -37,8 +39,10 @@ DESCRIPTION
     -g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple
     instances for e.g. home and work. Should normally be a hidden file (.filename)
     -h      Show short usage info
-    -e EXT
-       Use extension EXT instead of .txt
+    -e EXT  Use extension EXT instead of .txt for new notes
+    -l SEARCHEXT
+            Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, 
+            use e.g. '.txt\|.md'
     -d      Set notes directory (default is ~/Notes)
     -p      Prefix to use before title  (default is none). Accepts bash date sequences
             such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
@@ -130,8 +134,8 @@ function list()
    fi
 
    if [ "$Query" == "*" -o "$ShowAll" == "1" ]; then
-      Files=`grep -R --color -l -i "" * | grep $Extension | grep "/" | sort -u `
-      Files2=`ls -R --format single-column *$Extension 2> /dev/null`
+      Files=`grep -R --color -l -i "" * | grep $GrepExtension | grep "/" | sort -u `
+      Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $GrepExtension`
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `
@@ -139,7 +143,7 @@ $Files"
       Files=`cat $NoteHistoryFile`
    else
       #Find in content:
-      Files=`grep -R --color -l -i "$Query" * | grep $Extension 2> /dev/null `
+      Files=`grep -R --color -l -i "$Query" * | grep $GrepExtension 2> /dev/null `
       #Find in file names. Sed is to remove leading ./ in find output
       Files2=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
       Files="$Files
@@ -188,8 +192,8 @@ function open(){
       done
       IFS=$SAVEIFS
    elif [ $# -gt 0 ]; then
-      Files=`grep -R --color -l -i "" * | grep $Extension | grep "/" | sort -u`
-      Files2=`ls -R --format single-column *$Extension 2> /dev/null`
+      Files=`grep -R --color -l -i "" * | grep $GrepExtension | grep "/" | sort -u`
+      Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $GrepExtension`
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `
@@ -235,7 +239,7 @@ function openfile(){
 
 #MAIN#
 
-while getopts “hd:lqp:e:g:” OPTION
+while getopts “hd:l:qp:e:g:” OPTION
 do
    case $OPTION in
       h)
@@ -246,7 +250,7 @@ do
          Directory=$OPTARG
          ;;
       l)
-         Openlastnote=1
+         GrepExtension=$OPTARG
          ;;
       p)
          Prefix=$OPTARG

@@ -7,12 +7,13 @@ GrepExtension='.txt'
 Prefix=""
 NoteHistoryFile=.notetxthistory
 DefaultNoArguments='list history'
+QueryForEditor=0
 
 usage()
 {
    cat << EOF
    usage: note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          action [arguments]
+          [-q] action [arguments]
 
    ACTIONS:
     add|a [title]
@@ -26,12 +27,13 @@ longhelp()
 {
    cat << EOF
 SYNOPSIS
-   note.sh [-h] [-d directory] [-p prefix]  action [arguments]
+   note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
+          [-q] action [arguments]
 
 DESCRIPTION
    creates, opens or lists notes
 
-   All notes get extension .txt, and spaces in note names are replaced with underscores.
+   All notes get extension .txt by default, and spaces in note names are replaced with underscores.
 
    If no arguments are given, the last 10 opened notes are shown ("note.sh list history")
 
@@ -46,6 +48,7 @@ DESCRIPTION
     -d      Set notes directory (default is ~/Notes)
     -p      Prefix to use before title  (default is none). Accepts bash date sequences
             such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
+    -q      Query user for editor to use. If not specified, use vim
 
    ACTIONS:
     add|a [TITLE]
@@ -208,13 +211,21 @@ function openfile(){
 
    File="$*"
 
-   read -p "Open with vim (default), notepad++ (np,n) or more (m)? " EditorQ
+   if [[ $QueryForEditor == 1 ]]; then
+      read -p "Open with vim (default), notepad++ (np,n) or more (m)? " EditorQ
 
-   if [ "$EditorQ" == "np" -o "$EditorQ" == "n" ]; then
-      Winfile=`cygpath -w "$File"`
-      /c/Program\ Files\ \(x86\)/Notepad++/notepad++.exe "$Winfile" &
-   elif [ "$EditorQ" == "m" -o "$EditorQ" == "more" ]; then
-      more "$File"
+      if [ "$EditorQ" == "np" -o "$EditorQ" == "n" ]; then
+         Winfile=`cygpath -w "$File"`
+         /c/Program\ Files\ \(x86\)/Notepad++/notepad++.exe "$Winfile" &
+      elif [ "$EditorQ" == "m" -o "$EditorQ" == "more" ]; then
+         more "$File"
+      else
+         vim "$File"
+         if [ ! -f "$File" ]; then
+            echo "Note not saved, file $File not created"
+            exit
+         fi
+      fi
    else
       vim "$File"
       if [ ! -f "$File" ]; then
@@ -260,6 +271,9 @@ do
          ;;
       g)
          NoteHistoryFile=$OPTARG
+         ;;
+      q)
+         QueryForEditor=1
          ;;
       ?)
          usage

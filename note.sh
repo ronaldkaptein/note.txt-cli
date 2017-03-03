@@ -48,7 +48,8 @@ DESCRIPTION
     -d      Set notes directory (default is ~/Notes)
     -p      Prefix to use before title  (default is none). Accepts bash date sequences
             such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
-    -q      Query user for editor to use. If not specified, use vim
+    -q      Query user for editor to use. If not specified, use vim. If specified, currently vim, notepad++ and
+            more are listed. 
 
    ACTIONS:
     add|a [TITLE]

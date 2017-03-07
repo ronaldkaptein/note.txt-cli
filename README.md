@@ -1,19 +1,19 @@
-#NOTE.TXT Command Line Interface
+# NOTE.TXT Command Line Interface
 
 A simple cli for working with plain text notes, inspired by [todo.txt](https://github.com/ginatrapani/todo.txt-cli/).
 
-#Installing
+# Installing
 
-Just download `note.sh` to your computer, and type `note.sh -h` or `note.sh help` for more info on how to use it. 
+Just download `note.sh` to your computer. Type `note.sh -h` or `note.sh help` for more info on how to use it. 
 
-#Usage
+# Usage
 
 note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
 [-q] [-a] action [arguments]
 
 All notes get extension .txt by default, and spaces in note names are replaced with underscores.
 
-If no arguments are given, the last 10 opened notes are shown ("note.sh list history")
+If no arguments are given, the last 10 opened notes are shown (`note.sh list history`)
 
 ## OPTIONS:
 
@@ -33,22 +33,18 @@ more are listed.
 
 ## ACTIONS:
 
-* add|a [TITLE]: Create a new note. TITLE is optional, if no title is given, user is queried for
-one.
-* open|o [ITEM#] ["last"]: Open an existing note. The note number ITEM# corresponds to the number in the output of
-"note.sh list". If the argument is "last", the last opened note is opened.
-* list|ls [QUERY] ["history" | "h"]: Lists notes. Without argument, all notes in the notes directory are listed, including notes in
-subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are
-shown. If the argument is "history" or "h", the last 10 opened notes are shown.
+* add|a [TITLE]: Create a new note. TITLE is optional, if no title is given, user is queried for one.
+* open|o [ITEM#] ["last"]: Open an existing note. The note number ITEM# corresponds to the number in the output of "note.sh list". If the argument is "last", the last opened note is opened.
+* list|ls [QUERY] ["history" | "h"]: Lists notes. Without argument, all notes in the notes directory are listed, including notes in subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are shown. If the argument is "history" or "h", the last 10 opened notes are shown.
 * help: Displays this help
 
 ## EXAMPLES
 
-$ note.sh add
-$ note.sh a title
-$ note.sh list
-$ note.sh ls query
-$ note.sh ls last
-$ note.sh open
-$ note.sh o 22
-$ note.sh open last
+* $ note.sh add
+* $ note.sh a title
+* $ note.sh list
+* $ note.sh ls query
+* $ note.sh ls last
+* $ note.sh open
+* $ note.sh o 22
+* $ note.sh open last

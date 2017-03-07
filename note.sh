@@ -8,12 +8,13 @@ Prefix=""
 NoteHistoryFile=.notetxthistory
 DefaultNoArguments='list history'
 QueryForEditor=0
+ListArchivedNotes=0
 
 usage()
 {
    cat << EOF
    usage: note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] action [arguments]
+          [-q] [-a] action [arguments]
 
    ACTIONS:
     add|a [title]
@@ -28,7 +29,7 @@ longhelp()
    cat << EOF
 SYNOPSIS
    note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] action [arguments]
+          [-q] [-a] action [arguments]
 
 DESCRIPTION
    creates, opens or lists notes
@@ -38,6 +39,7 @@ DESCRIPTION
    If no arguments are given, the last 10 opened notes are shown ("note.sh list history")
 
    OPTIONS:
+    -a      Also lists archived notes, i.e. notes in the subdirectory "Archive". Default is not to list those.
     -g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple
     instances for e.g. home and work. Should normally be a hidden file (.filename)
     -h      Show short usage info
@@ -132,7 +134,7 @@ function list()
    #If no input, show all notes:
    if [ "$#" -eq 0 -o "$1" == "all" ]; then
       ShowAll=1
-      echo Showing all notes in $Directory:
+      echo Showing notes in $Directory:
    else
       Query="$@"
    fi
@@ -145,6 +147,7 @@ $Files"
       Files=`printf '%s\n' "${Files[@]}" `
    elif [ "$Query" == "history" -o "$Query" == "h" ]; then
       Files=`cat $NoteHistoryFile`
+      ListArchivedNotes=1 #Always show archived notes
    else
       #Find in content:
       Files=`grep -R --color -l -i "$Query" * | grep $GrepExtension 2> /dev/null `
@@ -155,9 +158,28 @@ $Files2"
       Files=`printf '%s\n' "${Files[@]}" | sort -u`
    fi
 
+   if [[ $ListArchivedNotes == 0 ]]; then
+      FilesHidden=`echo "$Files" | grep -E "^Archive/" | wc -l`
+      Files=`echo "$Files" |  grep -v -E "^Archive/"  `
+   else
+      FilesHidden=0
+   fi
+
    if [ "$Files" == "" ]; then
-      echo Nothing found...
+      if [[ $FilesHidden == 0 ]]; then
+         echo Nothing found...
+      elif [[ $FilesHidden == 1 ]]; then
+         echo "Nothing found ($FilesHidden hidden file matches, use -a to show)"
+      else
+         echo "Nothing found ($FilesHidden hidden files match, use -a to show)"
+      fi
       exit
+   fi
+
+   if [[ $ListArchivedNotes == 1 ]]; then
+      PS3='Choose file: '
+   else
+      PS3="Choose files ($FilesHidden files hidden): "
    fi
 
    SAVEIFS=$IFS
@@ -251,7 +273,7 @@ function openfile(){
 
 #MAIN#
 
-while getopts “hd:l:qp:e:g:” OPTION
+while getopts “ahd:l:qp:e:g:” OPTION
 do
    case $OPTION in
       h)
@@ -275,6 +297,9 @@ do
          ;;
       q)
          QueryForEditor=1
+         ;;
+      a)
+         ListArchivedNotes=1
          ;;
       ?)
          usage

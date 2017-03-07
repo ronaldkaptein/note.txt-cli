@@ -17,19 +17,14 @@ If no arguments are given, the last 10 opened notes are shown (`note.sh list his
 
 ## OPTIONS:
 
--a      Also lists archived notes, i.e. notes in the subdirectory "Archive". Default is not to list those.
--g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple
-instances for e.g. home and work. Should normally be a hidden file (.filename)
--h      Show short usage info
--e EXT  Use extension EXT instead of .txt for new notes
--l SEARCHEXT
-Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, 
-use e.g. '.txt\|.md'
--d      Set notes directory (default is ~/Notes)
--p      Prefix to use before title  (default is none). Accepts bash date sequences
-such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
--q      Query user for editor to use. If not specified, use vim. If specified, currently vim, notepad++ and
-more are listed. 
+* -a      Also lists archived notes, i.e. notes in the subdirectory "Archive". Default is not to list those.
+* -g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple instances for e.g. home and work. Should normally be a hidden file (.filename)
+* -h      Show short usage info
+* -e EXT  Use extension EXT instead of .txt for new notes
+* -l SEARCHEXT Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, use e.g. '.txt\|.md'
+* -d      Set notes directory (default is ~/Notes)
+* -p      Prefix to use before title  (default is none). Accepts bash date sequences such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
+* -q      Query user for editor to use. If not specified, use vim. If specified, currently vim, notepad++ and more are listed. 
 
 ## ACTIONS:
 

@@ -169,9 +169,9 @@ $Files2"
       if [[ $FilesHidden == 0 ]]; then
          echo Nothing found...
       elif [[ $FilesHidden == 1 ]]; then
-         echo "Nothing found ($FilesHidden hidden file matches, use -a to show)"
+         echo "Nothing found ($FilesHidden archived file matches, use -a to show)"
       else
-         echo "Nothing found ($FilesHidden hidden files match, use -a to show)"
+         echo "Nothing found ($FilesHidden archived files match, use -a to show)"
       fi
       exit
    fi
@@ -179,7 +179,7 @@ $Files2"
    if [[ $ListArchivedNotes == 1 ]]; then
       PS3='Choose file: '
    else
-      PS3="Choose files ($FilesHidden files hidden): "
+      PS3="Choose files ($FilesHidden archived files hidden): "
    fi
 
    SAVEIFS=$IFS

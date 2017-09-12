@@ -12,7 +12,7 @@ A list of things I want to implement in the future, also for my own reference:
 - Allow to turn of full-text search, when listing becomes slow
 - Align list output better, e.g. as in 'tree' output, for better readability
 - Allow to bypass editor choice and always open in default editor
-
+- Add option to automatically insert header with date and time after opening
 
 IMPLEMENTED:
 - 161107: Allow to specify which filetype/extensions to list (now only .txt)

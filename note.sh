@@ -14,6 +14,7 @@ CommandForNonText='cygstart'
 Locale='nl_NL.utf8'
 HeaderFormat="### %A %d %B %Y %H:%M"
 SearchFulltext=0
+InsertTimeStampIfNoTitle=0
 
 usage()
 {
@@ -63,6 +64,7 @@ DESCRIPTION
             more are listed. 
     -s ACTION
             Action to use when none is specified. Default is "list history"
+    -t      Insert a timestamp in the filename when no title is specified
 
    ACTIONS:
     add|a [TITLE]
@@ -103,15 +105,22 @@ EOF
 
 function add()
 {
-   Prefix=`date +$Prefix`
+   Prefix=`LC_ALL=$Locale date +$Prefix`
    cd $Directory
 
+   if [[ $InsertTimeStampIfNoTitle == 1 ]]; then
+     TitleWhenEmpty=$Prefix$(date +%Y%m%dT%H%M%S)
+   else
+     TitleWhenEmpty=$Prefix
+   fi
+
    if [ $# -eq 0 ]; then
-      read -p "Title of note (leave empty for DateTime): " Title
+      read -p "Title of note (leave empty for $TitleWhenEmpty): " Title
       if [ "$Title" == "" ]; then
-         Title=`date +%Y%m%dT%H%M%S`
+         Title=$TitleWhenEmpty
+      else
+        Title=$Prefix$Title
       fi
-      Title=$Prefix$Title
       File=$Title$Extension
    else
       #TODO: what to do with spaces in title/filename?
@@ -371,7 +380,7 @@ function move(){
 
 #MAIN#
 
-while getopts “afhmd:l:qp:e:g:s:” OPTION
+while getopts “afhmd:l:qp:e:g:s:t” OPTION
 do
    case $OPTION in
       h)
@@ -408,6 +417,9 @@ do
       s)
         DefaultNoArguments=$OPTARG
         ;;
+      t)
+        InsertTimeStampIfNoTitle=1
+        ;;
       ?)
          usage
          exit
@@ -420,7 +432,7 @@ NoteHistoryFile="$HOME/$NoteHistoryFile"
 
 if [[ "$1" == "" ]]; then
    action=`echo $DefaultNoArguments | cut -d " " -f 1`
-   arguments=`echo $DefaultNoArguments | cut -d " " -f 2-`
+   arguments=`echo $DefaultNoArguments | cut -s -d " " -f 2-`
 else
    action=$1
    shift

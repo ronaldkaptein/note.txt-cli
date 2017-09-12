@@ -10,6 +10,7 @@ DefaultNoArguments='list history'
 QueryForEditor=0
 ListArchivedNotes=0
 ListOnly=0
+CommandForNonText='cygstart'
 
 usage()
 {
@@ -48,7 +49,7 @@ DESCRIPTION
     -e EXT  Use extension EXT instead of .txt for new notes
     -l SEARCHEXT
             Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, 
-            use e.g. '.txt\|.md'
+            use e.g. '.txt\|.md'. To list all files, use '.'
     -m      With LIST action, only output the notes, do not query for opening.
     -d      Set notes directory (default is ~/Notes)
     -p      Prefix to use before title  (default is none). Accepts bash date sequences
@@ -254,14 +255,14 @@ function openfile(){
       elif [ "$EditorQ" == "m" -o "$EditorQ" == "more" ]; then
          more "$File"
       else
-         vim "$File"
+         openinvim "$File"
          if [ ! -f "$File" ]; then
             echo "Note not saved, file $File not created"
             exit
          fi
       fi
    else
-      vim "$File"
+      openinvim "$File"
       if [ ! -f "$File" ]; then
          echo "Note not saved, file $File not created"
          exit
@@ -280,6 +281,17 @@ function openfile(){
    echo "$File" > $NoteHistoryFile
    echo "$LastFiles" >> $NoteHistoryFile
 
+}
+
+function openinvim(){
+  File=$*
+  FileType=`file $File | cut -d\  -f2`
+  if [[ $FileType = "ASCII" ]] || [[ $FileType = "UTF-8" ]]; then
+    vim "$File"
+  else
+    echo "File is not a plain text file. Opening using $CommandForNonText"
+    $CommandForNonText "$File"
+  fi
 }
 
 function move(){

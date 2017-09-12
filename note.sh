@@ -9,17 +9,19 @@ NoteHistoryFile=.notetxthistory
 DefaultNoArguments='list history'
 QueryForEditor=0
 ListArchivedNotes=0
+ListOnly=0
 
 usage()
 {
    cat << EOF
    usage: note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] [-a] action [arguments]
+          [-q] [-a] [-m] action [arguments]
 
    ACTIONS:
     add|a [title]
     open|o [ITEM#] ["last"]
     list|ls [query] ["history" | "h"]
+    move|mv [query] [folder]
     help
 EOF
 }
@@ -29,7 +31,7 @@ longhelp()
    cat << EOF
 SYNOPSIS
    note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] [-a] action [arguments]
+          [-q] [-a] [-m] action [arguments]
 
 DESCRIPTION
    creates, opens or lists notes
@@ -47,6 +49,7 @@ DESCRIPTION
     -l SEARCHEXT
             Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, 
             use e.g. '.txt\|.md'
+    -m      With LIST action, only output the notes, do not query for opening.
     -d      Set notes directory (default is ~/Notes)
     -p      Prefix to use before title  (default is none). Accepts bash date sequences
             such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
@@ -64,6 +67,9 @@ DESCRIPTION
       Lists notes. Without argument, all notes in the notes directory are listed, including notes in
       subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are
       shown. If the argument is "history" or "h", the last 10 opened notes are shown.
+    move|mv [QUERY] [FOLDER] 
+      move the files matching QUERY to FOLDER. Only filenames are searched, not content and directory
+      names. User is queried before each move.
     help
       Displays this help
 
@@ -76,6 +82,7 @@ EXAMPLES
     $ note.sh open
     $ note.sh o 22
     $ note.sh open last
+    $ note.sh mv 170430_project Project
 
 CREDITS & COPYRIGHTS
    Copyright (C) 2016-2017 Ronald Kaptein
@@ -176,25 +183,29 @@ $Files2"
       exit
    fi
 
-   if [[ $ListArchivedNotes == 1 ]]; then
-      PS3='Choose file: '
+   if [[ $ListOnly == 1 ]]; then
+     echo "$Files"
    else
-      PS3="Choose files ($FilesHidden archived files hidden): "
+     if [[ $ListArchivedNotes == 1 ]]; then
+       PS3='Choose file: '
+     else
+       PS3="Choose files ($FilesHidden archived files hidden): "
+     fi
+
+     SAVEIFS=$IFS
+     IFS=$(echo -en "\n\b")
+     select Line in $Files
+     do
+       File=$Line
+       break
+     done
+     IFS=$SAVEIFS
+
+     echo Opening $File
+     openfile $File
    fi
 
-   SAVEIFS=$IFS
-   IFS=$(echo -en "\n\b")
-   select Line in $Files
-   do
-      File=$Line
-     break
-   done
-   IFS=$SAVEIFS
-
-   echo Opening $File
-   openfile $File
-
-}
+ }
 
 function open(){
 
@@ -271,9 +282,60 @@ function openfile(){
 
 }
 
+function move(){
+  Query="$1"
+  Folder="$2"
+
+  #Removing trailing / from Directory:
+  Directory=`echo $Directory | sed 's/\(.*\)[-\/]$/\1/g' `
+  cd $Directory
+
+  #Check and create directory if necessary:
+  if [[ -f "$Folder" ]]; then
+    echo "ERROR: $Folder is an existing file"
+    exit
+  elif [[ ! -d "$Folder" ]]; then #Directory does not exist
+    read -p "The directory \"$Folder\" does not exist. Create it? " yn
+    case $yn in
+      [Yy]* ) 
+          mkdir -p "$Folder"
+          ;;
+      [Nn]* ) 
+        exit
+        ;;
+      * ) echo "Please answer yes or no.";;
+    esac
+  fi
+
+  #Find in file names. Sed is to remove leading ./ in find output
+  Files=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
+  Files=`printf '%s\n' "${Files[@]}" | sort -u`
+
+  SAVEIFS=$IFS
+  IFS=$(echo -en "\n\b")
+  for File in $Files
+  do
+    if [[ "$Folder" == "." ]]; then
+      read -p "Move $File to /Notes ? " yn
+    else
+      read -p "Move $File to /Notes/$Folder? " yn
+    fi
+    case $yn in
+      [Yy]* ) 
+          ;;
+      [Nn]* ) 
+        echo Skipping "$file"
+        continue;;
+      * ) echo "Please answer yes or no.";;
+    esac
+    mv "$File" --target-directory="$Folder"
+  done
+  IFS=$SAVEIFS
+}
+
 #MAIN#
 
-while getopts “ahd:l:qp:e:g:” OPTION
+while getopts “ahmd:l:qp:e:g:” OPTION
 do
    case $OPTION in
       h)
@@ -301,6 +363,9 @@ do
       a)
          ListArchivedNotes=1
          ;;
+      m)
+         ListOnly=1;
+         ;;
       ?)
          usage
          exit
@@ -317,7 +382,7 @@ if [[ "$1" == "" ]]; then
 else
    action=$1
    shift
-   arguments=$*
+   arguments="$@"
 fi
 
 #Check extension
@@ -343,7 +408,18 @@ case $action in
       open $arguments
       exit 
       ;;
-   help )
+    move | mv)
+      if [ ! -z "$3" ]; then
+        echo ERROR: too many arguments passed
+        echo
+        usage
+        exit
+      fi
+
+      move "$1" "$2"
+      exit
+      ;;
+    help )
       longhelp
       exit 
       ;;

@@ -1,7 +1,6 @@
 A list of things I want to implement in the future, also for my own reference, in 
 the order of importance:
 
-- Add option to automatically insert header with date and time after opening
 - Add option to change default action when no arguments are given
 - Allow to specify in which directory a new note goes
 - Allow to specify filename for open action instead of number
@@ -12,12 +11,12 @@ the order of importance:
 - Enable auto completion of actions
 - Enable auto completion of filenames
 - Make number of notes in history configurable
-- Allow to turn of full-text search, when listing becomes slow
 - Align list output better, e.g. as in 'tree' output, for better readability
 - Allow to bypass editor choice and always open in default editor
-
 
 IMPLEMENTED:
 - 161107: Allow to specify which filetype/extensions to list (now only .txt)
 - 161107: Allow to specify the default filetype/extension for new notes (now .txt)
 - 170912: Move existing note to other folder
+- 170912: Add option to automatically insert header with date and time after opening
+- 170912: Allow to turn of full-text search, when listing becomes slow

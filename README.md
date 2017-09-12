@@ -8,8 +8,8 @@ Just download `note.sh` to your computer. Type `note.sh -h` or `note.sh help` fo
 
 # Usage
 
-note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-[-q] [-a] [-m] [-f] [-i] [-j] [-n] [-o] [-r] action [arguments]
+    note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
+       [-q] [-a] [-m] [-f] [-i] [-j] [-n] [-o] [-r] action [arguments]
 
 All notes get extension .txt by default, and spaces in note names are replaced with underscores.
 
@@ -26,11 +26,11 @@ otherwise using the -s option
 * -e EXT  Use extension EXT instead of .txt for new notes
 * -i      Always insert date header in VIM and start in insert mode. If -i and -j are both not specified, user is queried
   -j      Never insert date header in VIM, and startin normal mode. If -i and -j are both not specified, user is queried
-* -l SEARCHEXT Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, use e.g. '.txt\|.md'
+* -l SEARCHEXT Use string SEARCHEXT to determine extensions to list. Default is `.txt`. To specify multiple, use e.g. `.txt\|.md`
 * -m      With LIST action, only output the notes, do not query for opening.
 * -n      Never query for title. If no title is specified as input, the prefix is the title.
 * -o      Always open existing files immediately, don't query first
-* -p      Prefix to use before title  (default is none). Accepts bash date sequences such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
+* -p      Prefix to use before title  (default is none). Accepts bash date sequences such as %Y, %y, %m etc. So `note.sh -p %Y%m%d_ add Title` creates a note 201604030_Title.txt
 * -q      Query user for editor to use. If not specified, use vim. If specified, currently vim, notepad++ and more are listed. 
 * -r      Do not use prefix. Specified title will be filename
 * -s ACTION  Action to use when none is specified. Default is "list history"

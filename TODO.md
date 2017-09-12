@@ -17,3 +17,4 @@ A list of things I want to implement in the future, also for my own reference:
 IMPLEMENTED:
 - 161107: Allow to specify which filetype/extensions to list (now only .txt)
 - 161107: Allow to specify the default filetype/extension for new notes (now .txt)
+- 170912: Move existing note to other folder

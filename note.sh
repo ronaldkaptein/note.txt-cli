@@ -11,6 +11,8 @@ QueryForEditor=0
 ListArchivedNotes=0
 ListOnly=0
 CommandForNonText='cygstart'
+Locale='nl_NL.utf8'
+HeaderFormat="### %A %d %B %Y %H:%M"
 
 usage()
 {
@@ -286,12 +288,25 @@ function openfile(){
 function openinvim(){
   File=$*
   FileType=`file $File | cut -d\  -f2`
-  if [[ $FileType = "ASCII" ]] || [[ $FileType = "UTF-8" ]]; then
-    vim "$File"
-  else
+  if [[ -f $File ]] && [[ ! $FileType = "ASCII" ]] && [[ ! $FileType = "UTF-8" ]]; then
     echo "File is not a plain text file. Opening using $CommandForNonText"
     $CommandForNonText "$File"
+    exit
   fi
+  read -p "insert date-time header? " yn
+  case $yn in
+    [Yy]* )
+      if [ -f $File ]; then #Insert empty line when file already exists
+        LastLine=`tail -1 $File`
+        if [[ ! -z "${LastLine// }" ]]; then
+          echo "" >> $File
+        fi
+      fi
+      echo `LC_ALL=$Locale date +"$HeaderFormat"` >> $File
+      vim -c ":normal Go" "$File"
+      exit
+  esac
+  vim "$File"
 }
 
 function move(){

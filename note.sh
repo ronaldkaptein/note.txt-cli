@@ -15,12 +15,13 @@ Locale='nl_NL.utf8'
 HeaderFormat="### %A %d %B %Y %H:%M"
 SearchFulltext=0
 InsertTimeStampIfNoTitle=0
+AlwaysInsertDateHeader=0 #0=no, but ask, 1=yes and don't ask, -1 = no and don't ask
 
 usage()
 {
    cat << EOF
    usage: note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] [-a] [-m] [-f] action [arguments]
+          [-q] [-a] [-m] [-f] [-i] [-j] action [arguments]
 
    ACTIONS:
     add|a [title]
@@ -36,7 +37,7 @@ longhelp()
    cat << EOF
 SYNOPSIS
    note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] [-a] [-m] [-f] action [arguments]
+          [-q] [-a] [-m] [-f] [-i] [-j] action [arguments]
 
 DESCRIPTION
    creates, opens or lists notes
@@ -54,6 +55,10 @@ DESCRIPTION
     -g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple
     instances for e.g. home and work. Should normally be a hidden file (.filename)
     -h      Show short usage info
+    -i      Always insert date header in VIM and start in insert mode. If -i and -j are  both not specified, 
+            user is queried
+    -j      Never insert date header in VIM, and startin normal mode. If -i and -j are  both not specified, 
+            user is queried
     -l SEARCHEXT
             Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, 
             use e.g. '.txt\|.md'. To list all files, use '.'
@@ -70,9 +75,9 @@ DESCRIPTION
     add|a [TITLE]
       Create a new note. TITLE is optional, if no title is given, user is queried for
       one.
-    open|o [ITEM#] ["last"]
-      Open an existing note. The note number ITEM# corresponds to the number in the output of
-      "note.sh list". If the argument is "last", the last opened note is opened.
+    open|o [ITEM#] [QUERY] ["last"]: Open an existing note. The note number ITEM# corresponds to the number in the
+       output of "note.sh list". If the argument is "last", the last opened note is opened. If the argument is
+       another string, a filename query is performed, and if this returns a single file, this file is opened.
     list|ls [QUERY] ["history" | "h"]
       Lists notes. Without argument, all notes in the notes directory are listed, including notes in
       subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are
@@ -92,6 +97,7 @@ EXAMPLES
     $ note.sh open
     $ note.sh o 22
     $ note.sh open last
+    $ note.sh open 170913_p
     $ note.sh mv 170430_project Project
 
 CREDITS & COPYRIGHTS
@@ -229,8 +235,8 @@ $Files2"
  }
 
 function open(){
-
-   cd $Directory
+  Num='^[0-9]+$'
+  cd $Directory
    
    if [ "$1" == "last" -o "$1" == "l" ]; then
       File=`head -1 $NoteHistoryFile`
@@ -249,13 +255,28 @@ function open(){
          break
       done
       IFS=$SAVEIFS
-   elif [ $# -gt 0 ]; then
+   elif [[ $# -gt 0 ]] && [[ $1 =~ $Num ]]; then #Argument is number of note
       Files=`grep -R --color -l -i "" * | grep $GrepExtension | grep "/" | sort -u`
       Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $GrepExtension`
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `
+      if [[ $ListArchivedNotes == 0 ]]; then
+        FilesHidden=`echo "$Files" | grep -E "^Archive/" | wc -l`
+        Files=`echo "$Files" |  grep -v -E "^Archive/"  `
+      else
+        FilesHidden=0
+      fi
       File=`echo "$Files" |  sed "${1}q;d" `
+    else
+      Query="$@"
+      Files=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
+      Count=`echo "$Files" | wc -l`
+      if [ "$Count" -gt "1" ]; then
+        echo $Count matches found, please specify unique query
+      else
+        File=$Files
+      fi
    fi
 
    echo Opening $File
@@ -305,25 +326,29 @@ function openfile(){
 
 function openinvim(){
   File=$*
-  FileType=`file $File | cut -d\  -f2`
+  FileType=`file "$File" | cut -d: -f2 | cut -d \  -f2`
   if [[ -f $File ]] && [[ ! $FileType = "ASCII" ]] && [[ ! $FileType = "UTF-8" ]]; then
     echo "File is not a plain text file. Opening using $CommandForNonText"
     $CommandForNonText "$File"
     exit
   fi
-  read -p "insert date-time header? " yn
-  case $yn in
-    [Yy]* )
-      if [ -f $File ]; then #Insert empty line when file already exists
-        LastLine=`tail -1 $File`
-        if [[ ! -z "${LastLine// }" ]]; then
-          echo "" >> $File
-        fi
+  if [[ $AlwaysInsertDateHeader == 0 ]]; then
+    read -p "insert date-time header? " yn
+  else
+    yn=0
+  fi
+
+  if [[ $yn =~ [yY] ]] || [[ $AlwaysInsertDateHeader == 1 ]]; then
+    if [ -f "$File" ]; then #Insert empty line when file already exists
+      LastLine=`tail -1 "$File"`
+      if [[ ! -z "${LastLine// }" ]]; then
+        echo "" >> "$File"
       fi
-      echo `LC_ALL=$Locale date +"$HeaderFormat"` >> $File
-      vim -c ":normal Go" "$File"
-      exit
-  esac
+    fi
+    echo `LC_ALL=$Locale date +"$HeaderFormat"` >> "$File"
+    vim -c ":normal Go" "$File"
+    exit
+  fi
   vim "$File"
 }
 
@@ -380,7 +405,7 @@ function move(){
 
 #MAIN#
 
-while getopts “afhmd:l:qp:e:g:s:t” OPTION
+while getopts “afhmd:l:qp:e:g:s:tij” OPTION
 do
    case $OPTION in
       h)
@@ -419,6 +444,12 @@ do
         ;;
       t)
         InsertTimeStampIfNoTitle=1
+        ;;
+      i)
+        AlwaysInsertDateHeader=1
+        ;;
+      j)
+        AlwaysInsertDateHeader=-1 #Meaning no and don't ask
         ;;
       ?)
          usage

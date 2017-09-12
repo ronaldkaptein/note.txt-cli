@@ -9,7 +9,7 @@ Just download `note.sh` to your computer. Type `note.sh -h` or `note.sh help` fo
 # Usage
 
 note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-[-q] [-a] [-m] [-f] action [arguments]
+[-q] [-a] [-m] [-f] [-i] [-j] action [arguments]
 
 All notes get extension .txt by default, and spaces in note names are replaced with underscores.
 
@@ -24,6 +24,8 @@ otherwise using the -s option
 * -h      Show short usage info
 * -e EXT  Use extension EXT instead of .txt for new notes
 * -l SEARCHEXT Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, use e.g. '.txt\|.md'
+* -i      Always insert date header in VIM and start in insert mode. If -i and -j are both not specified, user is queried
+  -j      Never insert date header in VIM, and startin normal mode. If -i and -j are both not specified, user is queried
 * -m      With LIST action, only output the notes, do not query for opening.
 * -d      Set notes directory (default is ~/Notes)
 * -p      Prefix to use before title  (default is none). Accepts bash date sequences such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
@@ -33,7 +35,8 @@ otherwise using the -s option
 ## ACTIONS:
 
 * add|a [TITLE]: Create a new note. TITLE is optional, if no title is given, user is queried for one.
-* open|o [ITEM#] ["last"]: Open an existing note. The note number ITEM# corresponds to the number in the output of "note.sh list". If the argument is "last", the last opened note is opened.
+* open|o [ITEM#] [QUERY] ["last"]: Open an existing note. The note number ITEM# corresponds to the number in the output of "note.sh list". If the argument is "last", the last opened note is opened. If the argument is another string, 
+  a filename query is performed, and if this returns a single file, this file is opened.
 * list|ls [QUERY] ["history" | "h"]: Lists notes. Without argument, all notes in the notes directory are listed, including notes in subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are shown. If the argument is "history" or "h", the last 10 opened notes are shown.
 * move|mv [QUERY] [FOLDER] move the files matching QUERY to FOLDER. Only filenames are searched, not content and directory names. User is queried before each move.
 * help: Displays this help
@@ -48,5 +51,6 @@ otherwise using the -s option
 * $ note.sh open
 * $ note.sh o 22
 * $ note.sh open last
+* $ note.sh open 170913_p
 * $ note.sh mv 170913_project Project
 

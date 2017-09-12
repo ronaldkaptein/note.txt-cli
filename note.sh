@@ -16,12 +16,15 @@ HeaderFormat="### %A %d %B %Y %H:%M"
 SearchFulltext=0
 InsertTimeStampIfNoTitle=0
 AlwaysInsertDateHeader=0 #0=no, but ask, 1=yes and don't ask, -1 = no and don't ask
+OpenExistingWithoutQuery=0
+NeverQueryForTitle=0
+NoPrefix=0
 
 usage()
 {
    cat << EOF
    usage: note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] [-a] [-m] [-f] [-i] [-j] action [arguments]
+          [-q] [-a] [-m] [-f] [-i] [-j] [-o] [-n] [-r] action [arguments]
 
    ACTIONS:
     add|a [title]
@@ -37,7 +40,7 @@ longhelp()
    cat << EOF
 SYNOPSIS
    note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] [-a] [-m] [-f] [-i] [-j] action [arguments]
+          [-q] [-a] [-m] [-f] [-i] [-j] [-n] [-o] [-r] action [arguments]
 
 DESCRIPTION
    creates, opens or lists notes
@@ -63,10 +66,13 @@ DESCRIPTION
             Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, 
             use e.g. '.txt\|.md'. To list all files, use '.'
     -m      With LIST action, only output the notes, do not query for opening.
+    -n      Never query for title. If no title is specified as input, the prefix is the title.
+    -o      Always open existing files immediately, don't query first
     -p      Prefix to use before title  (default is none). Accepts bash date sequences
             such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
     -q      Query user for editor to use. If not specified, use vim. If specified, currently vim, notepad++ and
             more are listed. 
+    -r      Do not use prefix. Specified title will be filename
     -s ACTION
             Action to use when none is specified. Default is "list history"
     -t      Insert a timestamp in the filename when no title is specified
@@ -111,7 +117,11 @@ EOF
 
 function add()
 {
-   Prefix=`LC_ALL=$Locale date +$Prefix`
+   if [[ ! -z $Prefix ]] && [[ $NoPrefix == 0 ]]; then
+     Prefix=`LC_ALL=$Locale date +$Prefix`
+   else
+     Prefix=""
+   fi
    cd $Directory
 
    if [[ $InsertTimeStampIfNoTitle == 1 ]]; then
@@ -120,7 +130,7 @@ function add()
      TitleWhenEmpty=$Prefix
    fi
 
-   if [ $# -eq 0 ]; then
+   if [[ $# -eq 0 ]] && [[ $NeverQueryForTitle == 0 ]]; then
       read -p "Title of note (leave empty for $TitleWhenEmpty): " Title
       if [ "$Title" == "" ]; then
          Title=$TitleWhenEmpty
@@ -129,7 +139,6 @@ function add()
       fi
       File=$Title$Extension
    else
-      #TODO: what to do with spaces in title/filename?
       Title=$Prefix"$@" 
       File=$Title$Extension
    fi
@@ -140,7 +149,7 @@ function add()
       File=$FileWithoutSpaces
    fi
 
-   if [ -f "$File" ]; then
+   if [[ -f "$File" ]] && [[ $OpenExistingWithoutQuery == 0 ]]; then
       echo "File $File already exists."
       read -p "Open existing file (y/n, default y)? " Openexisting
       if [ "$Openexisting" == "n" ]; then
@@ -255,7 +264,7 @@ function open(){
          break
       done
       IFS=$SAVEIFS
-   elif [[ $# -gt 0 ]] && [[ $1 =~ $Num ]]; then #Argument is number of note
+   elif [[ $# -gt 0 ]] && [[ $1 =~ $Num ]] && [[ "$1" < "100000" ]]; then #Argument is number of note
       Files=`grep -R --color -l -i "" * | grep $GrepExtension | grep "/" | sort -u`
       Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $GrepExtension`
       Files="$Files2
@@ -333,7 +342,7 @@ function openinvim(){
     exit
   fi
   if [[ $AlwaysInsertDateHeader == 0 ]]; then
-    read -p "insert date-time header? " yn
+    read -p "insert date-time header and open in insert mode? " yn
   else
     yn=0
   fi
@@ -405,7 +414,7 @@ function move(){
 
 #MAIN#
 
-while getopts “afhmd:l:qp:e:g:s:tij” OPTION
+while getopts “afhmd:l:qp:e:g:s:tijonr” OPTION
 do
    case $OPTION in
       h)
@@ -450,6 +459,15 @@ do
         ;;
       j)
         AlwaysInsertDateHeader=-1 #Meaning no and don't ask
+        ;;
+      o)
+        OpenExistingWithoutQuery=1
+        ;;
+      n)
+        NeverQueryForTitle=1
+        ;;
+      r)
+        NoPrefix=1
         ;;
       ?)
          usage

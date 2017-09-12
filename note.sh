@@ -13,12 +13,13 @@ ListOnly=0
 CommandForNonText='cygstart'
 Locale='nl_NL.utf8'
 HeaderFormat="### %A %d %B %Y %H:%M"
+SearchFulltext=0
 
 usage()
 {
    cat << EOF
    usage: note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] [-a] [-m] action [arguments]
+          [-q] [-a] [-m] [-f] action [arguments]
 
    ACTIONS:
     add|a [title]
@@ -34,7 +35,7 @@ longhelp()
    cat << EOF
 SYNOPSIS
    note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] [-a] [-m] action [arguments]
+          [-q] [-a] [-m] [-f] action [arguments]
 
 DESCRIPTION
    creates, opens or lists notes
@@ -45,6 +46,7 @@ DESCRIPTION
 
    OPTIONS:
     -a      Also lists archived notes, i.e. notes in the subdirectory "Archive". Default is not to list those.
+    -f      Search full text and filenames instead of only filenames
     -g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple
     instances for e.g. home and work. Should normally be a hidden file (.filename)
     -h      Show short usage info
@@ -159,9 +161,13 @@ $Files"
       Files=`cat $NoteHistoryFile`
       ListArchivedNotes=1 #Always show archived notes
    else
-      #Find in content:
-      Files=`grep -R --color -l -i "$Query" * | grep $GrepExtension 2> /dev/null `
-      #Find in file names. Sed is to remove leading ./ in find output
+     if [[ $SearchFulltext == 1 ]]; then
+       #Find in content:
+       Files=`grep -R --color -l -i "$Query" * | grep $GrepExtension 2> /dev/null `
+     else
+       Files=''
+     fi
+     #Find in file names. Sed is to remove leading ./ in find output
       Files2=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
       Files="$Files
 $Files2"
@@ -362,7 +368,7 @@ function move(){
 
 #MAIN#
 
-while getopts “ahmd:l:qp:e:g:” OPTION
+while getopts “afhmd:l:qp:e:g:” OPTION
 do
    case $OPTION in
       h)
@@ -393,6 +399,9 @@ do
       m)
          ListOnly=1;
          ;;
+      f)
+        SearchFulltext=1;
+        ;;
       ?)
          usage
          exit

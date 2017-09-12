@@ -9,7 +9,7 @@ Just download `note.sh` to your computer. Type `note.sh -h` or `note.sh help` fo
 # Usage
 
 note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-[-q] [-a] [-m] action [arguments]
+[-q] [-a] [-m] [-f] action [arguments]
 
 All notes get extension .txt by default, and spaces in note names are replaced with underscores.
 
@@ -18,6 +18,7 @@ If no arguments are given, the last 10 opened notes are shown (`note.sh list his
 ## OPTIONS:
 
 * -a      Also lists archived notes, i.e. notes in the subdirectory "Archive". Default is not to list those.
+* -f      Search full text and filenames instead of only filenames
 * -g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple instances for e.g. home and work. Should normally be a hidden file (.filename)
 * -h      Show short usage info
 * -e EXT  Use extension EXT instead of .txt for new notes

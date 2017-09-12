@@ -13,7 +13,8 @@ note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l list
 
 All notes get extension .txt by default, and spaces in note names are replaced with underscores.
 
-If no arguments are given, the last 10 opened notes are shown (`note.sh list history`)
+If no arguments are given, the last 10 opened notes are shown (`note.sh list history`), unless specified
+otherwise using the -s option
 
 ## OPTIONS:
 
@@ -27,6 +28,7 @@ If no arguments are given, the last 10 opened notes are shown (`note.sh list his
 * -d      Set notes directory (default is ~/Notes)
 * -p      Prefix to use before title  (default is none). Accepts bash date sequences such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
 * -q      Query user for editor to use. If not specified, use vim. If specified, currently vim, notepad++ and more are listed. 
+* -s ACTION  Action to use when none is specified. Default is "list history"
 
 ## ACTIONS:
 

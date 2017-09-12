@@ -42,24 +42,27 @@ DESCRIPTION
 
    All notes get extension .txt by default, and spaces in note names are replaced with underscores.
 
-   If no arguments are given, the last 10 opened notes are shown ("note.sh list history")
+   If no arguments are given, the last 10 opened notes are shown ("note.sh list history"), unless specified
+   otherwise using the -s option
 
    OPTIONS:
     -a      Also lists archived notes, i.e. notes in the subdirectory "Archive". Default is not to list those.
+    -d      Set notes directory (default is ~/Notes)
+    -e EXT  Use extension EXT instead of .txt for new notes
     -f      Search full text and filenames instead of only filenames
     -g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple
     instances for e.g. home and work. Should normally be a hidden file (.filename)
     -h      Show short usage info
-    -e EXT  Use extension EXT instead of .txt for new notes
     -l SEARCHEXT
             Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, 
             use e.g. '.txt\|.md'. To list all files, use '.'
     -m      With LIST action, only output the notes, do not query for opening.
-    -d      Set notes directory (default is ~/Notes)
     -p      Prefix to use before title  (default is none). Accepts bash date sequences
             such as %Y, %y, %m etc. So "note.sh -p %Y%m%d_ add Title" creates a note 201604030_Title.txt
     -q      Query user for editor to use. If not specified, use vim. If specified, currently vim, notepad++ and
             more are listed. 
+    -s ACTION
+            Action to use when none is specified. Default is "list history"
 
    ACTIONS:
     add|a [TITLE]
@@ -368,7 +371,7 @@ function move(){
 
 #MAIN#
 
-while getopts “afhmd:l:qp:e:g:” OPTION
+while getopts “afhmd:l:qp:e:g:s:” OPTION
 do
    case $OPTION in
       h)
@@ -401,6 +404,9 @@ do
          ;;
       f)
         SearchFulltext=1;
+        ;;
+      s)
+        DefaultNoArguments=$OPTARG
         ;;
       ?)
          usage

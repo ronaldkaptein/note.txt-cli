@@ -8,10 +8,12 @@ Just download `note.sh` to your computer. Type `note.sh -h` or `note.sh help` fo
 
 # Usage
 
-    note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-       [-q] [-a] [-m] [-f] [-i] [-j] [-n] [-o] [-r] action [arguments]
+    note.sh [OPTIONS] ACTION [ARGUMENTS]
 
-All notes get extension .txt by default, and spaces in note names are replaced with underscores.
+
+Notes get a filename PrefixTitle.Extension. All of this can be specified as input argument or option. When no title
+is specified, the user is queried for one, unless the -n option is present. All notes get extension .txt by default,
+and spaces in note names are replaced with underscores.
 
 If no arguments are given, the last 10 opened notes are shown (`note.sh list history`), unless specified
 otherwise using the -s option
@@ -34,10 +36,12 @@ otherwise using the -s option
 * -q      Query user for editor to use. If not specified, use vim. If specified, currently vim, notepad++ and more are listed. 
 * -r      Do not use prefix. Specified title will be filename
 * -s ACTION  Action to use when none is specified. Default is "list history"
+* -t      Append a timestamp to the filename. Usefull when no title is specified. The filename will become PrefixTitle_Timestamp.Extension
 
 ## ACTIONS:
 
-* add|a [TITLE]: Create a new note. TITLE is optional, if no title is given, user is queried for one.
+* add|a [TITLE]:
+  Create a new note. TITLE is optional, if no title is given, user is queried for one.
 * open|o [ITEM#] [QUERY] ["last"]: Open an existing note. The note number ITEM# corresponds to the number in the output of "note.sh list". If the argument is "last", the last opened note is opened. If the argument is another string, 
   a filename query is performed, and if this returns a single file, this file is opened.
 * list|ls [QUERY] ["history" | "h"]: Lists notes. Without argument, all notes in the notes directory are listed, including notes in subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are shown. If the argument is "history" or "h", the last 10 opened notes are shown.

@@ -3,7 +3,7 @@
 #Set defaults:
 Directory=~/Notes/
 Extension='.txt'
-GrepExtension='.txt'
+ListExtensions='.txt'
 Prefix=""
 NoteHistoryFile=.notetxthistory
 DefaultNoArguments='list history'
@@ -14,17 +14,16 @@ CommandForNonText='cygstart'
 Locale='nl_NL.utf8'
 HeaderFormat="### %A %d %B %Y %H:%M"
 SearchFulltext=0
-InsertTimeStampIfNoTitle=0
-AlwaysInsertDateHeader=0 #0=no, but ask, 1=yes and don't ask, -1 = no and don't ask
-OpenExistingWithoutQuery=0
-NeverQueryForTitle=0
-NoPrefix=0
+AppendTimeStamp=0 #Append timestamp (Y%m%dT%H%M%S) to title.
+AlwaysInsertHeader=0 #0=no, but ask, 1=yes and don't ask, -1 = no and don't ask
+OpenExistingWithoutQuery=0 #If a note already exists, don't ask to open it
+NeverQueryForTitle=0 #Don't ask for title. If no title is specified as input, only the prefix is used.
+NoPrefix=0 #Do not use a prefix for the note title
 
 usage()
 {
    cat << EOF
-   usage: note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] [-a] [-m] [-f] [-i] [-j] [-o] [-n] [-r] action [arguments]
+   usage: note.sh [OPTIONS] ACTION [ARGUMENTS]
 
    ACTIONS:
     add|a [title]
@@ -39,28 +38,29 @@ longhelp()
 {
    cat << EOF
 SYNOPSIS
-   note.sh [-h] [-d directory] [-p prefix] [-g historyfile] [-e extension] [-l listextension] 
-          [-q] [-a] [-m] [-f] [-i] [-j] [-n] [-o] [-r] action [arguments]
+   note.sh [OPTIONS] ACTION [ARGUMENTS]
 
 DESCRIPTION
    creates, opens or lists notes
 
-   All notes get extension .txt by default, and spaces in note names are replaced with underscores.
+   Notes get a filename PrefixTitle.Extension. All of this can be specified as input argument or option. When no title
+   is specified, the user is queried for one, unless the -n option is present. All notes get extension .txt by default,
+   and spaces in note names are replaced with underscores.
 
    If no arguments are given, the last 10 opened notes are shown ("note.sh list history"), unless specified
    otherwise using the -s option
 
    OPTIONS:
-    -a      Also lists archived notes, i.e. notes in the subdirectory "Archive". Default is not to list those.
-    -d      Set notes directory (default is ~/Notes)
+    -a      Also lists archived notes, i.e. notes in the subdirectory "Archive". Default is not to list those.  
+    -d      Set notes directory (default is ~/Notes)  
     -e EXT  Use extension EXT instead of .txt for new notes
-    -f      Search full text and filenames instead of only filenames
+    -f      Search full text and filenames instead of only filenames when using LIST
     -g      Specify file name for saving note history (default is .notetxthistory). Useful when using multiple
     instances for e.g. home and work. Should normally be a hidden file (.filename)
     -h      Show short usage info
-    -i      Always insert date header in VIM and start in insert mode. If -i and -j are  both not specified, 
+    -i      Always insert date header in VIM and start in insert mode. If -i and -j are both not specified, 
             user is queried
-    -j      Never insert date header in VIM, and startin normal mode. If -i and -j are  both not specified, 
+    -j      Never insert date header in VIM, and start in normal mode. If -i and -j are both not specified, 
             user is queried
     -l SEARCHEXT
             Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, 
@@ -75,15 +75,16 @@ DESCRIPTION
     -r      Do not use prefix. Specified title will be filename
     -s ACTION
             Action to use when none is specified. Default is "list history"
-    -t      Insert a timestamp in the filename when no title is specified
+    -t      Append a timestamp to the filename. Usefull when no title is specified. The filename will become PrefixTitle_Timestamp.Extension
 
    ACTIONS:
     add|a [TITLE]
       Create a new note. TITLE is optional, if no title is given, user is queried for
       one.
-    open|o [ITEM#] [QUERY] ["last"]: Open an existing note. The note number ITEM# corresponds to the number in the
-       output of "note.sh list". If the argument is "last", the last opened note is opened. If the argument is
-       another string, a filename query is performed, and if this returns a single file, this file is opened.
+    open|o [ITEM#] [QUERY] ["last"]
+      Open an existing note. The note number ITEM# corresponds to the number in the
+      output of "note.sh list". If the argument is "last", the last opened note is opened. If the argument is
+      another string, a filename query is performed, and if this returns a single file, this file is opened.
     list|ls [QUERY] ["history" | "h"]
       Lists notes. Without argument, all notes in the notes directory are listed, including notes in
       subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are
@@ -124,24 +125,30 @@ function add()
    fi
    cd $Directory
 
-   if [[ $InsertTimeStampIfNoTitle == 1 ]]; then
-     TitleWhenEmpty=$Prefix$(date +%Y%m%dT%H%M%S)
+   Title="$@"
+
+   if [[ $AppendTimeStamp == 1 ]]; then
+     TitleWhenEmpty=$Prefix$Title_$(date +%Y%m%dT%H%M%S)
    else
-     TitleWhenEmpty=$Prefix
+     TitleWhenEmpty=$Prefix$Title
    fi
 
    if [[ $# -eq 0 ]] && [[ $NeverQueryForTitle == 0 ]]; then
       read -p "Title of note (leave empty for $TitleWhenEmpty): " Title
       if [ "$Title" == "" ]; then
-         Title=$TitleWhenEmpty
+         Title=$Prefix
       else
         Title=$Prefix$Title
       fi
-      File=$Title$Extension
    else
       Title=$Prefix"$@" 
-      File=$Title$Extension
    fi
+
+   if [[ $AppendTimeStamp == 1 ]]; then
+     Title="${Title}_$(date +%Y%m%dT%H%M%S)"
+   fi
+
+   File=$Title$Extension
 
    FileWithoutSpaces=`echo $File |  sed 's/ /_/g' `
    if [[ "$File" != "$FileWithoutSpaces" ]]; then
@@ -179,8 +186,8 @@ function list()
    fi
 
    if [ "$Query" == "*" -o "$ShowAll" == "1" ]; then
-      Files=`grep -R --color -l -i "" * | grep $GrepExtension | grep "/" | sort -u `
-      Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $GrepExtension`
+      Files=`grep -R --color -l -i "" * | grep $ListExtensions | grep "/" | sort -u `
+      Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $ListExtensions`
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `
@@ -190,7 +197,7 @@ $Files"
    else
      if [[ $SearchFulltext == 1 ]]; then
        #Find in content:
-       Files=`grep -R --color -l -i "$Query" * | grep $GrepExtension 2> /dev/null `
+       Files=`grep -R --color -l -i "$Query" * | grep $ListExtensions 2> /dev/null `
      else
        Files=''
      fi
@@ -265,8 +272,8 @@ function open(){
       done
       IFS=$SAVEIFS
    elif [[ $# -gt 0 ]] && [[ $1 =~ $Num ]] && [[ "$1" < "100000" ]]; then #Argument is number of note
-      Files=`grep -R --color -l -i "" * | grep $GrepExtension | grep "/" | sort -u`
-      Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $GrepExtension`
+      Files=`grep -R --color -l -i "" * | grep $ListExtensions | grep "/" | sort -u`
+      Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $ListExtensions`
       Files="$Files2
 $Files"
       Files=`printf '%s\n' "${Files[@]}" `
@@ -341,13 +348,13 @@ function openinvim(){
     $CommandForNonText "$File"
     exit
   fi
-  if [[ $AlwaysInsertDateHeader == 0 ]]; then
+  if [[ $AlwaysInsertHeader == 0 ]]; then
     read -p "insert date-time header and open in insert mode? " yn
   else
     yn=0
   fi
 
-  if [[ $yn =~ [yY] ]] || [[ $AlwaysInsertDateHeader == 1 ]]; then
+  if [[ $yn =~ [yY] ]] || [[ $AlwaysInsertHeader == 1 ]]; then
     if [ -f "$File" ]; then #Insert empty line when file already exists
       LastLine=`tail -1 "$File"`
       if [[ ! -z "${LastLine// }" ]]; then
@@ -425,7 +432,7 @@ do
          Directory=$OPTARG
          ;;
       l)
-         GrepExtension=$OPTARG
+         ListExtensions=$OPTARG
          ;;
       p)
          Prefix=$OPTARG
@@ -452,13 +459,13 @@ do
         DefaultNoArguments=$OPTARG
         ;;
       t)
-        InsertTimeStampIfNoTitle=1
+        AppendTimeStamp=1
         ;;
       i)
-        AlwaysInsertDateHeader=1
+        AlwaysInsertHeader=1
         ;;
       j)
-        AlwaysInsertDateHeader=-1 #Meaning no and don't ask
+        AlwaysInsertHeader=-1 #Meaning no and don't ask
         ;;
       o)
         OpenExistingWithoutQuery=1

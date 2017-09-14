@@ -286,10 +286,21 @@ $Files"
       File=`echo "$Files" |  sed "${1}q;d" `
     else
       Query="$@"
-      Files=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
-      Count=`echo "$Files" | wc -l`
+      if [[ $SearchFulltext == 1 ]]; then
+        #Find in content:
+        Files=`grep -R --color -l -i "$Query" * | grep $ListExtensions 2> /dev/null `
+      else
+        Files=''
+      fi
+      Files2=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
+      Files=`echo "$Files
+$Files2" | sed '/^\$*$/d' `
+      Count=`echo "$Files" | sed '/^\$*$/d' |  wc -l`
       if [ "$Count" -gt "1" ]; then
         echo $Count matches found, please specify unique query
+      elif [[ $Count == 0 ]]; then
+        echo Nothing found...
+        exit
       else
         File=$Files
       fi

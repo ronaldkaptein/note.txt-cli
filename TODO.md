@@ -1,6 +1,7 @@
 A list of things I want to implement in the future, also for my own reference, in 
 the order of importance:
 
+- Allow to list full paragraphs matching a query, instead of only files
 - Allow to specify in which directory a new note goes
 - Allow to specify multiple queries (AND), e.g by doing -q QUERY1 -q QUERY2
 - Allow to search only in a specific subdirectory

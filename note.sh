@@ -266,7 +266,7 @@ $Files2"
 function open(){
   Num='^[0-9]+$'
   cd $Directory
-   
+
    if [ "$1" == "last" -o "$1" == "l" ]; then
       File=`head -1 $NoteHistoryFile`
       if [ "$File" == "" ];then 
@@ -284,12 +284,12 @@ function open(){
          break
       done
       IFS=$SAVEIFS
-   elif [[ $# -gt 0 ]] && [[ $1 =~ $Num ]] && [[ "$1" < "100000" ]]; then #Argument is number of note
+   elif [[ $# -gt 0 ]] && [[ $1 =~ $Num ]] && [[ $1 -lt 100000 ]]; then #Argument is number of note
       Files=`grep -R --color -l -i "" * | grep $ListExtensions | grep "/" | sort -u`
       Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $ListExtensions`
       Files="$Files2
 $Files"
-      Files=`printf '%s\n' "${Files[@]}" `
+      Files=`printf '%s\n' "${Files[@]}" | sort $SortOptions `
       if [[ $ListArchivedNotes == 0 ]]; then
         FilesHidden=`echo "$Files" | grep -E "^Archive/" | wc -l`
         Files=`echo "$Files" |  grep -v -E "^Archive/"  `

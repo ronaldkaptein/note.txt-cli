@@ -6,6 +6,7 @@ Extension='.txt'
 ListExtensions='.txt'
 Prefix=""
 NoteHistoryFile=.notetxthistory
+NoteHistoryN=10 #Number of notes to save in history file
 DefaultNoArguments='list history'
 QueryForEditor=0
 ListArchivedNotes=0
@@ -28,7 +29,7 @@ usage()
    ACTIONS:
     add|a [title]
     open|o [ITEM#] ["last"]
-    list|ls [query] ["history" | "h"]
+    list|ls [query] ["history" | "h" [N] ]
     move|mv [query] [folder]
     help
 EOF
@@ -62,6 +63,8 @@ DESCRIPTION
             user is queried
     -j      Never insert date header in VIM, and start in normal mode. If -i and -j are both not specified, 
             user is queried
+    -k NUMBER
+            Number of files to save in the note history (see option -g). Default is 10.
     -l SEARCHEXT
             Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple, 
             use e.g. '.txt\|.md'. To list all files, use '.'
@@ -85,10 +88,11 @@ DESCRIPTION
       Open an existing note. The note number ITEM# corresponds to the number in the
       output of "note.sh list". If the argument is "last", the last opened note is opened. If the argument is
       another string, a filename query is performed, and if this returns a single file, this file is opened.
-    list|ls [QUERY] ["history" | "h"]
+    list|ls [QUERY] ["history" | "h" [N]]
       Lists notes. Without argument, all notes in the notes directory are listed, including notes in
       subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are
-      shown. If the argument is "history" or "h", the last 10 opened notes are shown.
+      shown. If the argument is "history" or "h", the files in the history are shown (see option -g). If a 
+      numerical argument N is passed after "history", the most recent N notes are shown.
     move|mv [QUERY] [FOLDER] 
       move the files matching QUERY to FOLDER. Only filenames are searched, not content and directory
       names. User is queried before each move.
@@ -100,7 +104,8 @@ EXAMPLES
     $ note.sh a title
     $ note.sh list
     $ note.sh ls query
-    $ note.sh ls last
+    $ note.sh list history
+    $ note.sh list history 5
     $ note.sh open
     $ note.sh o 22
     $ note.sh open last
@@ -172,6 +177,7 @@ function list()
 {
    ShowAll=0
    ShowLast=0
+   Num='^[0-9]+$'
 
    #Removing trailing / from Directory:
    Directory=`echo $Directory | sed 's/\(.*\)[-\/]$/\1/g' `
@@ -193,6 +199,11 @@ $Files"
       Files=`printf '%s\n' "${Files[@]}" `
    elif [ "$Query" == "history" -o "$Query" == "h" ]; then
       Files=`cat $NoteHistoryFile`
+      ListArchivedNotes=1 #Always show archived notes
+   elif  [[ ("$(echo $Query | sed 's/ .*//')" == "history") && ( ! -z $(echo $Query | sed -n 's/^history \([0-9]*\)$/\1/p')) ]] || \
+          [[ ("$(echo $Query | sed 's/ .*//')" == "h") && ( ! -z $(echo $Query | sed -n 's/^h \([0-9]*\)$/\1/p')) ]]; then
+      N=`echo $Query | sed -n 's/^[a-z]* \([0-9]*\)$/\1/p'`
+      Files=`head -$N $NoteHistoryFile`
       ListArchivedNotes=1 #Always show archived notes
    else
      if [[ $SearchFulltext == 1 ]]; then
@@ -339,13 +350,14 @@ function openfile(){
 
    CheckExists=`grep -Fx "$File" $NoteHistoryFile`
    if [[ "$CheckExists" != "" ]]; then
-      #File already in lastnotefile, move it to top
-      LastFiles=`grep -vFx "$File" $NoteHistoryFile`
+      #File already in lastnotefile, remove it from list, and add it to top later
+      LastFiles=`grep -vFx "$File" $NoteHistoryFile | head -$(echo "$NoteHistoryN -1" | bc)`
    else
       #trash oldest file in lastnotefile and add new file on top
-      LastFiles=`head -9 $NoteHistoryFile`
+      LastFiles=`head -$(echo "$NoteHistoryN -1" | bc) $NoteHistoryFile`
    fi
 
+   #Add opened file to top:
    echo "$File" > $NoteHistoryFile
    echo "$LastFiles" >> $NoteHistoryFile
 
@@ -432,7 +444,7 @@ function move(){
 
 #MAIN#
 
-while getopts “afhmd:l:qp:e:g:s:tijonr” OPTION
+while getopts “afhmd:l:qp:e:g:s:tijonrk:” OPTION
 do
    case $OPTION in
       h)
@@ -486,6 +498,9 @@ do
         ;;
       r)
         NoPrefix=1
+        ;;
+      k)
+        NoteHistoryN=$OPTARG
         ;;
       ?)
          usage

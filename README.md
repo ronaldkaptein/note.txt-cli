@@ -29,6 +29,7 @@ otherwise using the -s option
 * -i      Always insert date header in VIM and start in insert mode. If -i and -j are both not specified, user is queried
   -j      Never insert date header in VIM, and startin normal mode. If -i and -j are both not specified, user is queried
 * -l SEARCHEXT Use string SEARCHEXT to determine extensions to list. Default is `.txt`. To specify multiple, use e.g. `.txt\|.md`
+* -k NUMBER Number of files to save in the note history (see option -g). Default is 10.
 * -m      With LIST action, only output the notes, do not query for opening.
 * -n      Never query for title. If no title is specified as input, the prefix is the title.
 * -o      Always open existing files immediately, don't query first
@@ -44,20 +45,20 @@ otherwise using the -s option
   Create a new note. TITLE is optional, if no title is given, user is queried for one.
 * open|o [ITEM#] [QUERY] ["last"]: Open an existing note. The note number ITEM# corresponds to the number in the output of "note.sh list". If the argument is "last", the last opened note is opened. If the argument is another string, 
   a filename query is performed, and if this returns a single file, this file is opened.
-* list|ls [QUERY] ["history" | "h"]: Lists notes. Without argument, all notes in the notes directory are listed, including notes in subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are shown. If the argument is "history" or "h", the last 10 opened notes are shown.
+* list|ls [QUERY] ["history" | "h" [N]]: Lists notes. Without argument, all notes in the notes directory are listed, including notes in subdirectories. If QUERY is given, only notes with QUERY in either the filename of content are shown. If the argument is "history" or "h", the files in the history are shown (see option -g). If a numerical argument N is passed after "history", the most recent N notes are shown.
 * move|mv [QUERY] [FOLDER] move the files matching QUERY to FOLDER. Only filenames are searched, not content and directory names. User is queried before each move.
 * help: Displays this help
 
 ## EXAMPLES
 
-* $ note.sh add
-* $ note.sh a title
-* $ note.sh list
-* $ note.sh ls query
-* $ note.sh ls last
-* $ note.sh open
-* $ note.sh o 22
-* $ note.sh open last
-* $ note.sh open 170913_p
-* $ note.sh mv 170913_project Project
-
+     $ note.sh add
+     $ note.sh a title
+     $ note.sh list
+     $ note.sh ls query
+     $ note.sh list history
+     $ note.sh list history 5
+     $ note.sh open
+     $ note.sh o 22
+     $ note.sh open last
+     $ note.sh open 170913_p
+     $ note.sh mv 170430_project Project

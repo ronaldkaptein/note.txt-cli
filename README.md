@@ -38,6 +38,7 @@ otherwise using the -s option
 * -r      Do not use prefix. Specified title will be filename
 * -s ACTION  Action to use when none is specified. Default is "list history"
 * -t      Append a timestamp to the filename. Usefull when no title is specified. The filename will become PrefixTitle_Timestamp.Extension
+* -u      Reverse sort order of file lists
 
 ## ACTIONS:
 

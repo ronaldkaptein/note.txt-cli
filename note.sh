@@ -20,6 +20,7 @@ AlwaysInsertHeader=0 #0=no, but ask, 1=yes and don't ask, -1 = no and don't ask
 OpenExistingWithoutQuery=0 #If a note already exists, don't ask to open it
 NeverQueryForTitle=0 #Don't ask for title. If no title is specified as input, only the prefix is used.
 NoPrefix=0 #Do not use a prefix for the note title
+SortOptions=""
 
 usage()
 {
@@ -79,6 +80,7 @@ DESCRIPTION
     -s ACTION
             Action to use when none is specified. Default is "list history"
     -t      Append a timestamp to the filename. Usefull when no title is specified. The filename will become PrefixTitle_Timestamp.Extension
+    -u      Reverse sort order of file lists
 
    ACTIONS:
     add|a [TITLE]
@@ -192,11 +194,11 @@ function list()
    fi
 
    if [ "$Query" == "*" -o "$ShowAll" == "1" ]; then
-      Files=`grep -R --color -l -i "" * | grep $ListExtensions | grep "/" | sort -u `
+      Files=`grep -R --color -l -i "" * | grep $ListExtensions | grep "/" | sort $SortOptions `
       Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $ListExtensions`
       Files="$Files2
 $Files"
-      Files=`printf '%s\n' "${Files[@]}" `
+      Files=`printf '%s\n' "${Files[@]}" | sort $SortOptions`
    elif [ "$Query" == "history" -o "$Query" == "h" ]; then
       Files=`cat $NoteHistoryFile`
       ListArchivedNotes=1 #Always show archived notes
@@ -216,7 +218,7 @@ $Files"
       Files2=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
       Files="$Files
 $Files2"
-      Files=`printf '%s\n' "${Files[@]}" | sort -u`
+      Files=`printf '%s\n' "${Files[@]}" | sort -u $SortOptions`
    fi
 
    if [[ $ListArchivedNotes == 0 ]]; then
@@ -309,6 +311,7 @@ $Files2" | sed '/^\$*$/d' `
       Count=`echo "$Files" | sed '/^\$*$/d' |  wc -l`
       if [ "$Count" -gt "1" ]; then
         echo $Count matches found, please specify unique query
+        exit
       elif [[ $Count == 0 ]]; then
         echo Nothing found...
         exit
@@ -444,7 +447,7 @@ function move(){
 
 #MAIN#
 
-while getopts “afhmd:l:qp:e:g:s:tijonrk:” OPTION
+while getopts "afhmd:l:qp:e:g:s:tijonrk:u" OPTION
 do
    case $OPTION in
       h)
@@ -501,6 +504,9 @@ do
         ;;
       k)
         NoteHistoryN=$OPTARG
+        ;;
+      u)
+        SortOptions="-r"
         ;;
       ?)
          usage

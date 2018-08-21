@@ -354,10 +354,11 @@ function openfile(){
    CheckExists=`grep -Fx "$File" $NoteHistoryFile`
    if [[ "$CheckExists" != "" ]]; then
       #File already in lastnotefile, remove it from list, and add it to top later
-      LastFiles=`grep -vFx "$File" $NoteHistoryFile | head -$(echo "$NoteHistoryN -1" | bc)`
+      LastFiles=`grep -vFx "$File" $NoteHistoryFile `
    else
       #trash oldest file in lastnotefile and add new file on top
-      LastFiles=`head -$(echo "$NoteHistoryN -1" | bc) $NoteHistoryFile`
+      filesToKeep=$(($NoteHistoryN-1))
+      LastFiles=`head -$filesToKeep $NoteHistoryFile`
    fi
 
    #Add opened file to top:

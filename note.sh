@@ -368,8 +368,8 @@ function openfile(){
 
 function openinvim(){
   File=$*
-  FileType=`file "$File" | cut -d: -f2 | cut -d \  -f2`
-  if [[ -f $File ]] && [[ ! $FileType = "ASCII" ]] && [[ ! $FileType = "UTF-8" ]]; then
+  FileType=`file "$File" | cut -d: -f2-`
+  if [[ -f $File ]] && [[ ! $FileType = *"ASCII"* ]] && [[ ! $FileType = *"UTF-8"* ]]; then
     echo "File is not a plain text file. Opening using $CommandForNonText"
     $CommandForNonText "$File"
     exit

@@ -38,7 +38,7 @@ EOF
 
 longhelp()
 {
-   cat << EOF
+   less << EOF
 SYNOPSIS
    note.sh [OPTIONS] ACTION [ARGUMENTS]
 

@@ -248,19 +248,26 @@ $Files2"
        PS3="Choose files ($FilesHidden archived files hidden): "
      fi
 
-     SAVEIFS=$IFS
-     IFS=$(echo -en "\n\b")
-     select Line in $Files
-     do
-       File=$Line
-       break
+     File=""
+
+     while [ "$File" == "" ]; do
+       SAVEIFS=$IFS
+       IFS=$(echo -en "\n\b")
+       select Line in $Files
+       do
+         File=$Line
+         break
+       done
+       IFS=$SAVEIFS
+
+       if [ "$File" == "" ]; then
+         echo "Invalid input..."
+       fi
      done
-     IFS=$SAVEIFS
 
      echo Opening $File
      openfile $File
    fi
-
  }
 
 function open(){

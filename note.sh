@@ -205,7 +205,7 @@ function list()
      Files=`grep -R --color -l -i "" * | grep $ListExtensions | grep "/" | sort $SortOptions `
      Files2=`ls -R --format single-column *.* 2> /dev/null  | grep $ListExtensions`
      Files="$Files2
-     $Files"
+$Files"
      Files=`printf '%s\n' "${Files[@]}" | sort $SortOptions`
    elif [ "$Query" == "history" -o "$Query" == "h" ]; then
      Files=`cat $NoteHistoryFile`
@@ -223,9 +223,9 @@ function list()
           Files=''
         fi
         #Find in file names. Sed is to remove leading ./ in find output
-        Files2=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
+        Files2=`find -path "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
         Files="$Files
-        $Files2"
+$Files2"
         Files=`printf '%s\n' "${Files[@]}" | sort -u $SortOptions`
    fi
 
@@ -322,7 +322,7 @@ function open(){
     else
       Files=''
     fi
-    Files2=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
+    Files2=`find -path "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
     Files=`echo "$Files
     $Files2" | sed '/^\$*$/d' `
     Count=`echo "$Files" | sed '/^\$*$/d' |  wc -l`
@@ -438,7 +438,7 @@ function move(){
   fi
 
   #Find in file names. Sed is to remove leading ./ in find output
-  Files=`find -name "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
+  Files=`find -path "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
   Files=`printf '%s\n' "${Files[@]}" | sort -u`
 
   SAVEIFS=$IFS

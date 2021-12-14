@@ -211,20 +211,20 @@ $Files"
      Files=`cat $NoteHistoryFile`
      ListArchivedNotes=1 #Always show archived notes
    elif  [[ ("$(echo $Query | sed 's/ .*//')" == "history") && ( ! -z $(echo $Query | sed -n 's/^history \([0-9]*\)$/\1/p')) ]] || \
-     [[ ("$(echo $Query | sed 's/ .*//')" == "h") && ( ! -z $(echo $Query | sed -n 's/^h \([0-9]*\)$/\1/p')) ]]; then
-        N=`echo $Query | sed -n 's/^[a-z]* \([0-9]*\)$/\1/p'`
-        Files=`head -$N $NoteHistoryFile`
-        ListArchivedNotes=1 #Always show archived notes
-      else
-        if [[ $SearchFulltext == 1 ]]; then
-          #Find in content:
-          Files=`grep -R --color -l -i "$Query" * | grep $ListExtensions 2> /dev/null `
-        else
-          Files=''
-        fi
-        #Find in file names. Sed is to remove leading ./ in find output
-        Files2=`find -path "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
-        Files="$Files
+          [[ ("$(echo $Query | sed 's/ .*//')" == "h") && ( ! -z $(echo $Query | sed -n 's/^h \([0-9]*\)$/\1/p')) ]]; then
+      N=`echo $Query | sed -n 's/^[a-z]* \([0-9]*\)$/\1/p'`
+      Files=`head -$N $NoteHistoryFile`
+      ListArchivedNotes=1 #Always show archived notes
+   else
+     if [[ $SearchFulltext == 1 ]]; then
+       #Find in content:
+       Files=`grep -R --color -l -i "$Query" * | grep $ListExtensions 2> /dev/null `
+     else
+       Files=''
+     fi
+     #Find in file names. Sed is to remove leading ./ in find output
+      Files2=`find -iwholename "*${Query}*"| sed 's/.\/\(.*\)/\1/g' 2> /dev/null`
+      Files="$Files
 $Files2"
         Files=`printf '%s\n' "${Files[@]}" | sort -u $SortOptions`
    fi

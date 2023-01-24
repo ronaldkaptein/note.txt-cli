@@ -28,7 +28,7 @@ otherwise using the -s option
 * -e EXT  Use extension EXT instead of .txt for new notes
 * -i      Always insert date header in VIM and start in insert mode. If -i and -j are both not specified, user is queried
   -j      Never insert date header in VIM, and startin normal mode. If -i and -j are both not specified, user is queried
-* -l SEARCHEXT Use string SEARCHEXT to determine extensions to list. Default is `.txt`. To specify multiple, use e.g. `.txt\|.md`
+* -l SEARCHEXT Use string SEARCHEXT to determine extensions to list. Default is `.txt`. To specify multiple, seperate then with a comma, e.g. `.txt,.md`
 * -k NUMBER Number of files to save in the note history (see option -g). Default is 10.
 * -m      With LIST action, only output the notes, do not query for opening.
 * -n      Never query for title. If no title is specified as input, the prefix is the title.

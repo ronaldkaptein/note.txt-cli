@@ -70,7 +70,7 @@ DESCRIPTION
             Number of files to save in the note history (see option -g). Default is 10.
     -l SEARCHEXT
             Use string SEARCHEXT to determine extensions to list. Default is '.txt'. To specify multiple,
-            use e.g. '.txt\|.md'. To list all files, use '.'
+            seperate them with a comma, e.g. .txt,.md. To list all files, use '.'
     -m      With LIST action, only output the notes, do not query for opening.
     -n      Never query for title. If no title is specified as input, the prefix is the title.
     -o      Always open existing files immediately, don't query first
@@ -557,6 +557,12 @@ fi
 if [ ! -f "$NoteHistoryFile" ]; then
   touch "$NoteHistoryFile"
 fi
+
+#Replace , in ListExtensions with \| for use in grep
+ListExtensions=`echo "$ListExtensions" | sed -r 's/,/\\\|/g'`
+#Replace . in ListExtensions with \. for use in grep. Without this, the dot of
+#the extensions will act as a regexp wildcard, possibly leading to a lot of wrong matches
+ListExtensions=`echo "$ListExtensions" | sed -r 's/[.]/\\\./g'`
 
 case $action in
   add | a | new | n)
